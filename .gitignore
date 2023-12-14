@@ -1,0 +1,49 @@
+.DS_STORE
+
+# Maven
+target/
+
+# Gradle
+build/
+.gradle/
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+logs/
+
+# Compiled class file
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# External dependencies
+/lib/
+
+# Application properties
+application.properties
+
+# Spring Boot DevTools
+.restart
+
+# Spring Boot Actuator
+management/
+
+# Test reports
+/test-output/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+out/
