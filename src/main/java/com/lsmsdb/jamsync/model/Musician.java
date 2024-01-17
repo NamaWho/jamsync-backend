@@ -3,7 +3,6 @@ package com.lsmsdb.jamsync.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.Document;
-import org.bson.json.JsonObject;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +16,7 @@ public class Musician {
     private char gender;
     private Integer age;
     private String username;
-    private Credential credential;
+    private Credentials credentials;
     private String contactEmail;
     private String profilePictureUrl;
     private Location location;
