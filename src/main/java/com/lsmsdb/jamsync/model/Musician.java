@@ -17,7 +17,7 @@ public class Musician {
     private char gender;
     private Integer age;
     private String username;
-    // password
+    private Credential credential;
     private String contactEmail;
     private String profilePictureUrl;
     private Location location;
