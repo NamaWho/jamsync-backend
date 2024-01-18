@@ -1,5 +1,6 @@
 package com.lsmsdb.jamsync.controller;
 
+import com.lsmsdb.jamsync.controller.response.Response;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.service.factory.MusicianServiceFactory;
 import lombok.AllArgsConstructor;
@@ -20,12 +21,12 @@ public class MusicianController {
     }
 
     @GetMapping("/{id}")
-    public Musician getMusicianById(@PathVariable String id) {
+    public Response getMusicianById(@PathVariable String id) {
         try {
-            return musicianService.getMusicianById(id);
+            Musician m = musicianService.getMusicianById(id);
+            return new Response(false,"", m);
         } catch (BusinessException ex) {
-            System.out.println(ex.getMessage());
-            return null;
+            return new Response(true, ex.getMessage(), null);
         }
     }
 }

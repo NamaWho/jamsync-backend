@@ -19,6 +19,7 @@ public class BandDAO {
             cursor = collection.find(eq("_id", id)).iterator();
             if(cursor.hasNext()) {
                 Document document = cursor.next();
+                document.put("username", document.get("name"));
                 return new Band(document);
             }
         } catch(Exception ex) {

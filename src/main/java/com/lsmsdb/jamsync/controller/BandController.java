@@ -1,5 +1,6 @@
 package com.lsmsdb.jamsync.controller;
 
+import com.lsmsdb.jamsync.controller.response.Response;
 import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.service.BandService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
@@ -20,12 +21,12 @@ public class BandController {
     }
 
     @GetMapping("/{id}")
-    public Band getBandById(@PathVariable String id) {
+    public Response getBandById(@PathVariable String id) {
         try {
-            return bandService.getBandById(id);
+            Band b = bandService.getBandById(id);
+            return new Response(false, null, b);
         } catch (BusinessException ex) {
-            System.out.println(ex.getMessage());
-            return null;
+            return new Response(true, ex.getMessage(), null);
         }
     }
 }
