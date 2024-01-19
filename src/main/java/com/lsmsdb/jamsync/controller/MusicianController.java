@@ -35,10 +35,20 @@ public class MusicianController {
     }
 
     @GetMapping("/{id}/followers")
-    public Response getFollowers(@PathVariable String id) {
+    public Response getFollowersCount(@PathVariable String id) {
         try {
             Integer followersCount = registeredUserService.getFollowersCount(id, "Musician");
             return new Response(false,"", followersCount);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
+    @GetMapping("/{id}/following")
+    public Response getFollowingCount(@PathVariable String id) {
+        try {
+            Integer followingCount = musicianService.getFollowingCount(id);
+            return new Response(false,"", followingCount);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }

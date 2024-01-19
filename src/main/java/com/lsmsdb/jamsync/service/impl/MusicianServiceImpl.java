@@ -23,4 +23,13 @@ public class MusicianServiceImpl implements MusicianService {
 
     @Override
     public void deleteMusicianById(String id) throws BusinessException {}
+
+    @Override
+    public Integer getFollowingCount(String _id) throws BusinessException {
+        try {
+            return musicianDAO.getFollowingCount(_id);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
 }
