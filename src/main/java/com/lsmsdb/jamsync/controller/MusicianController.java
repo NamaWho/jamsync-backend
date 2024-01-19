@@ -6,10 +6,7 @@ import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.factory.MusicianServiceFactory;
 import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.lsmsdb.jamsync.service.MusicianService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 @RestController
@@ -49,6 +46,19 @@ public class MusicianController {
         try {
             Integer followingCount = musicianService.getFollowingCount(id);
             return new Response(false,"", followingCount);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
+    @PostMapping("/{id}/follow")
+    public Response follow(@PathVariable String id, @RequestParam String userId, @RequestParam String type) {
+        if (!type.equals("Musician") && !type.equals("Band")) {
+            return new Response(true, "Invalid type", null);
+        }
+        try {
+            musicianService.follow(id, userId, type);
+            return new Response(false,"", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }

@@ -32,4 +32,13 @@ public class MusicianServiceImpl implements MusicianService {
             throw new BusinessException(ex);
         }
     }
+
+    @Override
+    public void follow(String id, String followedId, String type) throws BusinessException {
+        try {
+            musicianDAO.follow(id, followedId, type);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
 }
