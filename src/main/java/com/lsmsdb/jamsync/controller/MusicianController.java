@@ -2,7 +2,9 @@ package com.lsmsdb.jamsync.controller;
 
 import com.lsmsdb.jamsync.controller.response.Response;
 import com.lsmsdb.jamsync.model.Musician;
+import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.factory.MusicianServiceFactory;
+import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +17,11 @@ import com.lsmsdb.jamsync.service.exception.BusinessException;
 public class MusicianController {
 
     private MusicianService musicianService;
+    private RegisteredUserService registeredUserService;
 
     public MusicianController(){
         this.musicianService = MusicianServiceFactory.create().getService();
+        this.registeredUserService = RegisteredUserServiceFactory.create().getService();
     }
 
     @GetMapping("/{id}")
@@ -25,6 +29,16 @@ public class MusicianController {
         try {
             Musician m = musicianService.getMusicianById(id);
             return new Response(false,"", m);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
+    @GetMapping("/{id}/followers")
+    public Response getFollowers(@PathVariable String id) {
+        try {
+            Integer followersCount = registeredUserService.getFollowersCount(id, "Musician");
+            return new Response(false,"", followersCount);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
