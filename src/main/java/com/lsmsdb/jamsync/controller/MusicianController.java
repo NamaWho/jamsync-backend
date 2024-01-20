@@ -63,4 +63,17 @@ public class MusicianController {
             return new Response(true, ex.getMessage(), null);
         }
     }
+
+    @PostMapping("/{id}/unfollow")
+    public Response unfollow(@PathVariable String id, @RequestParam String userId, @RequestParam String type) {
+        if (!type.equals("Musician") && !type.equals("Band")) {
+            return new Response(true, "Invalid type", null);
+        }
+        try {
+            musicianService.unfollow(id, userId, type);
+            return new Response(false,"", null);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
 }

@@ -14,4 +14,6 @@ public interface MusicianService {
     Integer getFollowingCount(String _id) throws BusinessException;
 
     void follow(String id, String followedId, String type) throws BusinessException;
+
+    void unfollow(String id, String followedId, String type) throws BusinessException;
 }

@@ -72,4 +72,22 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
+
+    public void unfollow(String id, String followedId, String type) throws DAOException {
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            session.executeWrite(tx -> {
+                // Check if the relationship effectively exists
+                String checkQuery = String.format("MATCH (follower:Musician {_id: $followerId})-[r:FOLLOWS]->(u:%s {_id: $followedId}) RETURN r", type);
+                Result checkResult = tx.run(checkQuery, Values.parameters("followerId", id, "followedId", followedId));
+                if (!checkResult.hasNext()) {
+                    throw new RuntimeException("The musician is not following this user.");
+                }
+                String query = String.format("MATCH (follower:Musician {_id: $followerId})-[r:FOLLOWS]->(u:%s {_id: $followedId}) DELETE r", type);
+                tx.run(query, Values.parameters("followerId", id, "followedId", followedId));
+                return 0;
+            });
+        } catch (RuntimeException e) {
+            throw new DAOException(e.getMessage());
+        }
+    }
 }
