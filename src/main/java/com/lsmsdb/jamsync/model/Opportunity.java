@@ -2,7 +2,9 @@ package com.lsmsdb.jamsync.model;
 
 import com.lsmsdb.jamsync.service.RegisteredUserService;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.bson.Document;
 
 import java.time.LocalDate;
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@ToString
 public class Opportunity {
     /**
      * _id, --> INDEX
@@ -107,5 +111,26 @@ public class Opportunity {
         this.visits = d.getInteger("visits");
         this.publisher = (Document) d.get("publisher");
         this.applications = (List<Application>) d.get("applications");
+    }
+
+    public Document toDocument() {
+        Document document = new Document();
+        document.put("_id", this._id);
+        document.put("location", this.location.toDocument());
+        document.put("title", this.title);
+        document.put("description", this.description);
+        document.put("role", this.role);
+        document.put("instruments", this.instruments);
+        document.put("genres", this.genres);
+        document.put("minimumAge", this.minimumAge);
+        document.put("maximumAge", this.maximumAge);
+        document.put("gender", this.gender);
+        document.put("createdAt", this.createdAt.toString());
+        document.put("modifiedAt", this.modifiedAt.toString());
+        document.put("expiresAt", this.expiresAt.toString());
+        document.put("visits", this.visits);
+        document.put("publisher", this.publisher);
+        document.put("applications", this.applications);
+        return document;
     }
 }

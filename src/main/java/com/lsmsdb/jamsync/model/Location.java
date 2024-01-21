@@ -28,4 +28,14 @@ public class Location {
             this.longitude = d.getDouble("long");
         }
     }
+
+    public Document toDocument(){
+        Document d = new Document();
+        d.append("city", this.city);
+        d.append("state", this.state);
+        d.append("country", this.country);
+        d.append("lat", this.latitude);
+        d.append("long", this.longitude);
+        return d;
+    }
 }

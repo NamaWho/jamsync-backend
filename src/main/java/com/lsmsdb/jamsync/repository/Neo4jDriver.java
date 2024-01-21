@@ -1,9 +1,9 @@
 package com.lsmsdb.jamsync.repository;
 
 import lombok.Getter;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.*;
+
+import java.util.concurrent.TimeUnit;
 
 public class Neo4jDriver {
     @Getter
@@ -16,7 +16,12 @@ public class Neo4jDriver {
         String username = Neo4jConfig.getNeo4jUsername();
         String password = Neo4jConfig.getNeo4jPassword();
 
-        driver = GraphDatabase.driver(uri, AuthTokens.basic(username, password));
+        Config config = Config.builder().withMaxConnectionPoolSize(100).
+                withMaxTransactionRetryTime(5, TimeUnit.SECONDS).
+                build()
+                ;
+
+        driver = GraphDatabase.driver(uri, AuthTokens.basic(username, password), config);
     }
 
     public void closeConnection(){
