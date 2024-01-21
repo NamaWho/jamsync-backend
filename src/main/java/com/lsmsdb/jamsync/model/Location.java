@@ -19,7 +19,13 @@ public class Location {
         this.city = d.getString("city");
         this.state = d.getString("state");
         this.country = d.getString("country");
-        this.latitude = d.getDouble("lat");
-        this.longitude = d.getDouble("long");
+        if (d.get("lat") instanceof String) {
+            this.latitude = Double.parseDouble(d.getString("lat"));
+            this.longitude = Double.parseDouble(d.getString("long"));
+        }
+        else {
+            this.latitude = d.getDouble("lat");
+            this.longitude = d.getDouble("long");
+        }
     }
 }

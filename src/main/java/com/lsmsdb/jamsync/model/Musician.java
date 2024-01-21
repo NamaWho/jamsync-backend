@@ -1,6 +1,7 @@
 package com.lsmsdb.jamsync.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.Document;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class Musician extends RegisteredUser {
     private String firstName;
     private String lastName;

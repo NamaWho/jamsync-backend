@@ -1,6 +1,8 @@
 package com.lsmsdb.jamsync.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.Document;
 
@@ -10,6 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public abstract class RegisteredUser {
     protected String _id;
     protected String username;
@@ -59,5 +62,4 @@ public abstract class RegisteredUser {
             this.lastLoginDateTime = LocalDate.parse(lastLoginDateTimeString);
         }
     }
-    
 }
