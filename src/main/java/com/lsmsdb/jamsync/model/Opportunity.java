@@ -85,7 +85,9 @@ public class Opportunity {
         this.genres = (List<String>) d.get("genres");
         this.minimumAge = d.getInteger("minimumAge") == null ? 0 : d.getInteger("minimumAge");
         this.maximumAge = d.getInteger("maximumAge") == null ? 0 : d.getInteger("maximumAge");
-        this.gender = d.getString("gender") == null ? '-' : d.getString("gender").charAt(0);
+        Object genderObj = d.get("gender");
+        this.gender = genderObj == null ? '-' : ((Character) genderObj);
+        // this.gender = d.getString("gender") == null ? '-' : d.getString("gender").charAt(0);
 
         String creationDateTimeString = d.getString("createdAt");
         if(creationDateTimeString.length() > 10) {

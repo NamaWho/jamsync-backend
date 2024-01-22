@@ -14,7 +14,7 @@ public class Neo4jConsistencyManager {
 
     private static final Neo4jConsistencyManager manager = new Neo4jConsistencyManager();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private List<Neo4jOperation> operations = new ArrayList<>();
+    private List<String> operations = new ArrayList<>();
 
     // retrieve Driver from Neo4jDriver class in repository package
 
@@ -25,7 +25,7 @@ public class Neo4jConsistencyManager {
 
     public static Neo4jConsistencyManager getInstance() { return manager; }
 
-    public void pushOperation(Neo4jOperation operation) {
+    public void pushOperation(String operation) {
         operations.add(operation);
     }
     private void retryOperation() {}
