@@ -7,10 +7,7 @@ import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.BandServiceFactory;
 import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/bands")
@@ -42,5 +39,11 @@ public class BandController {
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
+    }
+
+    @PostMapping("/{id}/member")
+    public Response addMember(@PathVariable String id, @RequestParam String memberId) {
+        // TODO: implement
+        return null;
     }
 }

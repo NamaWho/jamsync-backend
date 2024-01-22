@@ -29,4 +29,9 @@ public class BandDAO {
         }
         return null;
     }
+
+    public boolean addMember(String bandId, String musicianId) throws DAOException {
+        //TODO: implement
+        return false;
+    }
 }

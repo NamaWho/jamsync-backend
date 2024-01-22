@@ -17,4 +17,10 @@ public class BandServiceImpl implements BandService {
             throw new BusinessException(ex);
         }
     }
+
+    @Override
+    public boolean addMember(String bandId, String memberId) throws BusinessException {
+        //TODO: Implement this method
+        return false;
+    }
 }

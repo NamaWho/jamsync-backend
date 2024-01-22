@@ -5,4 +5,6 @@ import com.lsmsdb.jamsync.service.exception.BusinessException;
 
 public interface BandService {
     Band getBandById(String id) throws BusinessException;
+
+    boolean addMember(String bandId, String memberId) throws BusinessException;
 }
