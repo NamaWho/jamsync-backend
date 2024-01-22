@@ -17,6 +17,15 @@ public class OpportunityController {
     public OpportunityController() {
         this.opportunityService = OpportunityServiceFactory.create().getService();
     }
+    @PostMapping("/")
+    public Response createOpportunity(@RequestBody Opportunity opportunity) {
+        try {
+            Opportunity o = opportunityService.createOpportunity(opportunity);
+            return new Response(false,"", o);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
 
     @GetMapping("/{id}")
     public Response getOpportunityById(@PathVariable String id) {
@@ -28,11 +37,11 @@ public class OpportunityController {
         }
     }
 
-    @PostMapping("/")
-    public Response createOpportunity(@RequestBody Opportunity opportunity) {
+    @DeleteMapping("/{id}")
+    public Response deleteOpportunityById(@PathVariable String id) {
         try {
-            Opportunity o = opportunityService.createOpportunity(opportunity);
-            return new Response(false,"", o);
+            opportunityService.deleteOpportunityById(id);
+            return new Response(false,"", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }

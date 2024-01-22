@@ -8,4 +8,6 @@ public interface OpportunityService {
     Opportunity getOpportunityById(String id) throws BusinessException;
 
     Opportunity createOpportunity(Opportunity opportunity) throws BusinessException;
+
+    void deleteOpportunityById(String id) throws BusinessException;
 }

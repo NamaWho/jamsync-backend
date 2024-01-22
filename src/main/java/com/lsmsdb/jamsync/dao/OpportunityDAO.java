@@ -83,4 +83,46 @@ public class OpportunityDAO {
 
         return new Opportunity(document);
     }
+
+    public void deleteOpportunityById(String id) throws DAOException {
+        // 1. Delete the opportunity in MongoDB
+        MongoCursor<Document> cursor = null;
+        Document deletedDocument = null;
+        try {
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+            deletedDocument = collection.findOneAndDelete(eq("_id", id));
+            if (deletedDocument == null) {
+                throw new Exception("Opportunity not found");
+            }
+        } catch(Exception ex) {
+            throw new DAOException(ex);
+        } finally {
+            if(cursor != null)
+                cursor.close();
+        }
+
+        // 2. Add task to update redundancies in the background (eventual consistency)
+        MongoUpdater.getInstance().pushTask(new MongoTask("DELETE_OPPORTUNITY", deletedDocument));
+
+        // 3. Delete the node in Neo4j
+        String formattedQuery = "MATCH (o:Opportunity {_id: %s}) " +
+                                "DETACH DELETE o";
+
+        String query = String.format(formattedQuery,
+                "\"" + id + "\"");
+
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            session.executeWrite(tx -> {
+                tx.run(query);
+                return null;
+            });
+        } catch (TransactionTerminatedException e) {
+            // Add this task to a queue to be executed later from the Neo4jConsistencyManager
+            System.out.println("Transaction terminated. Adding task to queue...");
+            Neo4jConsistencyManager.getInstance().pushOperation(query);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+    }
 }

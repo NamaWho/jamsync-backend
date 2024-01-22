@@ -13,6 +13,15 @@ public class OpportunityServiceImpl implements OpportunityService {
     private final static OpportunityDAO opportunityDAO = new OpportunityDAO();
 
     @Override
+    public Opportunity createOpportunity(Opportunity opportunity) throws BusinessException {
+        try {
+            return opportunityDAO.createOpportunity(opportunity);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
     public Opportunity getOpportunityById(String id) throws BusinessException {
         try {
             return opportunityDAO.getOpportunityById(id);
@@ -21,13 +30,13 @@ public class OpportunityServiceImpl implements OpportunityService {
         }
     }
 
-
     @Override
-    public Opportunity createOpportunity(Opportunity opportunity) throws BusinessException {
+    public void deleteOpportunityById(String id) throws BusinessException {
         try {
-            return opportunityDAO.createOpportunity(opportunity);
+            opportunityDAO.deleteOpportunityById(id);
         } catch (DAOException ex) {
             throw new BusinessException(ex);
         }
     }
+
 }
