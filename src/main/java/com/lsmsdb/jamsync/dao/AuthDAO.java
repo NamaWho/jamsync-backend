@@ -46,4 +46,15 @@ public class AuthDAO {
         }
         return false;
     }
+
+    public boolean checkUsername(String username, String type) throws DAOException{
+        try(MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.valueOf(type.toUpperCase())).find(eq("credentials.user", username)).iterator()){
+            if(cursor.hasNext()){
+                return true;
+            }
+        }catch(Exception ex){
+            throw new DAOException(ex);
+        }
+        return false;
+    }
 }

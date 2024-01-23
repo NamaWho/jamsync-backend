@@ -21,6 +21,14 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception ex) {
             throw new BusinessException(ex);
         }
+    }
 
+    @Override
+    public boolean checkUsername(String username, String type) throws BusinessException {
+        try {
+            return authDAO.checkUsername(username, type);
+        } catch (Exception ex) {
+            throw new BusinessException(ex);
+        }
     }
 }
