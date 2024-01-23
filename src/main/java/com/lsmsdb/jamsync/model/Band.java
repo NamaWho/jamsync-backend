@@ -23,4 +23,11 @@ public class Band extends RegisteredUser{
         this.yearsTogether = d.getDouble("yearsTogether");
         this.gigsPlayed = d.getInteger("gigsPlayed");
     }
+
+    public Document toDocument() {
+        Document d = super.toDocument();
+        d.append("yearsTogether", this.yearsTogether);
+        d.append("gigsPlayed", this.gigsPlayed);
+        return d;
+    }
 }

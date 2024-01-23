@@ -26,4 +26,14 @@ public class Musician extends RegisteredUser {
         this.age = d.getInteger("age");
         this.instruments = (List<String>) d.get("instruments");
     }
+
+    public Document toDocument() {
+        Document d = super.toDocument();
+        d.append("firstName", this.firstName);
+        d.append("lastName", this.lastName);
+        d.append("gender", this.gender);
+        d.append("age", this.age);
+        d.append("instruments", this.instruments);
+        return d;
+    }
 }

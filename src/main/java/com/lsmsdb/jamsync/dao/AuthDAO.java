@@ -3,6 +3,8 @@ package com.lsmsdb.jamsync.dao;
 import com.lsmsdb.jamsync.dao.exception.DAOException;
 import com.lsmsdb.jamsync.dao.utils.HashUtil;
 import com.lsmsdb.jamsync.model.Credentials;
+import com.lsmsdb.jamsync.model.Musician;
+import com.lsmsdb.jamsync.model.RegisteredUser;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -15,6 +17,7 @@ import java.util.ResourceBundle;
 import static com.mongodb.client.model.Filters.eq;
 
 public class AuthDAO {
+
     public boolean login(String type, String user, String password) throws DAOException{
         MongoCollectionsEnum collectionType;
         switch (type) {

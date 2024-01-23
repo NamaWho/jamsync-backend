@@ -10,6 +10,15 @@ public class MusicianServiceImpl implements MusicianService {
     private final static MusicianDAO musicianDAO = new MusicianDAO();
 
     @Override
+    public void createMusician(Musician musician) throws BusinessException {
+        try {
+            musicianDAO.createMusician(musician);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
     public Musician getMusicianById(String id) throws BusinessException {
         try {
             return musicianDAO.getMusicianById(id);
@@ -17,9 +26,6 @@ public class MusicianServiceImpl implements MusicianService {
             throw new BusinessException(ex);
         }
     }
-
-    @Override
-    public void createMusician(Musician musician) throws BusinessException {}
 
     @Override
     public void deleteMusicianById(String id) throws BusinessException {}

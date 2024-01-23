@@ -62,4 +62,23 @@ public abstract class RegisteredUser {
             this.lastLoginDateTime = LocalDate.parse(lastLoginDateTimeString);
         }
     }
+
+    protected Document toDocument() {
+        Document d = new Document();
+        d.append("_id", this._id);
+        d.append("username", this.username);
+        d.append("contactEmail", this.contactEmail);
+        d.append("about", this.about);
+        d.append("profilePictureUrl", this.profilePictureUrl);
+        d.append("genres", this.genres);
+        d.append("credentials", this.credentials.toDocument());
+        d.append("location", this.location.toDocument());
+        d.append("isBanned", this.isBanned);
+        d.append("creationDateTime", this.creationDateTime.toString());
+        d.append("lastUpdateDateTime", this.lastUpdateDateTime.toString());
+        d.append("lastLoginDateTime", this.lastLoginDateTime.toString());
+        d.append("opportunities", this.opportunities);
+        d.append("applications", this.applications);
+        return d;
+    }
 }

@@ -2,6 +2,7 @@ package com.lsmsdb.jamsync.controller;
 
 import com.lsmsdb.jamsync.controller.response.Response;
 import com.lsmsdb.jamsync.model.Band;
+import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.service.BandService;
 import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
@@ -19,6 +20,20 @@ public class BandController {
     public BandController(){
         this.bandService = BandServiceFactory.create().getService();
         this.registeredUserService = RegisteredUserServiceFactory.create().getService();
+    }
+
+    @PostMapping("/")
+    public Response createBand(@RequestBody Band band) {
+        if (band.getCredentials() == null) {
+            return new Response(true, "Credentials are required", null);
+        }
+
+        try {
+            bandService.createBand(band);
+            return new Response(false,"", null);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
     }
 
     @GetMapping("/{id}")

@@ -21,6 +21,20 @@ public class MusicianController {
         this.registeredUserService = RegisteredUserServiceFactory.create().getService();
     }
 
+    @PostMapping("/")
+    public Response createMusician(@RequestBody Musician musician) {
+        if (musician.getCredentials() == null) {
+            return new Response(true, "Credentials are required", null);
+        }
+
+        try {
+            musicianService.createMusician(musician);
+            return new Response(false,"", null);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
     @GetMapping("/{id}")
     public Response getMusicianById(@PathVariable String id) {
         try {

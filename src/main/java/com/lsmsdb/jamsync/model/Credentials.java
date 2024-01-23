@@ -16,4 +16,11 @@ public class Credentials {
         this.user = d.getString("user");
         this.password = d.getString("password");
     }
+
+    public Document toDocument() {
+        Document d = new Document();
+        d.append("user", this.user);
+        d.append("password", this.password);
+        return d;
+    }
 }

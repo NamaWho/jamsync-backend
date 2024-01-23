@@ -5,6 +5,7 @@ import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
+import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
@@ -13,10 +14,48 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.Neo4jException;
+import org.neo4j.driver.exceptions.TransactionTerminatedException;
 
+import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
 import static com.mongodb.client.model.Filters.eq;
 
 public class MusicianDAO {
+
+    public void createMusician(Musician musician) throws DAOException {
+        // hash the password
+        String digest = hashPassword(musician.getCredentials().getPassword());
+        musician.getCredentials().setPassword(digest);
+
+        // 1. Create a new musician in MongoDB
+        try {
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.MUSICIAN);
+            collection.insertOne(musician.toDocument());
+        } catch(Exception ex) {
+            throw new DAOException(ex);
+        }
+
+        // 2. Create a node in Neo4j
+        String formattedQuery = "CREATE (m:Musician {_id: %s, username: %s, genres: %s, instruments: %s}) RETURN m;";
+        String query = String.format(formattedQuery,
+                                    "\"" + musician.get_id() + "\"",
+                                    "\"" + musician.getUsername() + "\"",
+                                    "\"" + musician.getGenres() + "\"",
+                                    "\"" + musician.getInstruments() + "\"");
+
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            session.executeWrite(tx -> {
+                tx.run(query);
+                return null;
+            });
+        } catch (TransactionTerminatedException e) {
+            // Add this task to a queue to be executed later from the Neo4jConsistencyManager
+            System.out.println("Transaction terminated. Adding task to queue...");
+            Neo4jConsistencyManager.getInstance().pushOperation(query);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+    }
 
     public Musician getMusicianById(String id) throws DAOException {
         MongoCursor<Document> cursor = null;

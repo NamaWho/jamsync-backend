@@ -10,6 +10,15 @@ public class BandServiceImpl implements BandService {
     private final static BandDAO bandDAO = new BandDAO();
 
     @Override
+    public void createBand(Band band) throws BusinessException {
+        try {
+            bandDAO.createBand(band);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
     public Band getBandById(String id) throws BusinessException {
         try {
             return bandDAO.getBandById(id);

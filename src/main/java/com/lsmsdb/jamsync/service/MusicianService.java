@@ -4,10 +4,9 @@ import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.model.Musician;
 
 public interface MusicianService {
+    void createMusician(Musician musician) throws BusinessException;
 
     Musician getMusicianById(String id) throws BusinessException;
-
-    void createMusician(Musician musician) throws BusinessException;
 
     void deleteMusicianById(String id) throws BusinessException;
 
