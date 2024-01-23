@@ -28,6 +28,12 @@ public class MusicianServiceImpl implements MusicianService {
     }
 
     @Override
+    public Musician putMusicianById(String id, Musician musician) throws BusinessException {
+        //TODO: implement
+        return null;
+    }
+
+    @Override
     public void deleteMusicianById(String id) throws BusinessException {
         try {
             musicianDAO.deleteMusicianById(id);
