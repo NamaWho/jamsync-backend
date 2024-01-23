@@ -72,6 +72,7 @@ public class MongoUpdater {
                     deleteOpportunity(mongoTask);
                     break;
                 case "UPDATE_MUSICIAN":
+                    deleteMusician(mongoTask);
                     break;
                 case "DELETE_MUSICIAN":
                     break;
@@ -171,6 +172,42 @@ public class MongoUpdater {
 
             if (bulkWrites.isEmpty()) return;
             collection = MongoDriver.getInstance().getCollection(collectionName);
+            BulkWriteResult result = collection.bulkWrite(bulkWrites);
+        } catch (Exception ex) {
+            failedTasks.add(mongoTask);
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void deleteMusician(MongoTask mongoTask){
+        System.out.println("deleteMusician routine started...");
+        Document musician = mongoTask.getDocument();
+        System.out.println(musician);
+        MongoCursor<Document> cursor = null;
+
+        try {
+            // 1. remove all the opportunities published by the musician.
+            // Use the deleteOpportunity routine
+            List<Document> opportunities = (List<Document>) musician.get("opportunities");
+            for(Document opportunity : opportunities) {
+                MongoTask task = new MongoTask("DELETE_OPPORTUNITY", opportunity);
+                deleteOpportunity(task);
+            }
+
+            // 2. remove musician from the applications documents in the opportunities documents
+            List<WriteModel<Document>> bulkWrites = new ArrayList<>();
+            List<Document> applications = (List<Document>) musician.get("applications");
+            for(Document application : applications) {
+                String applicationId = application.getString("_id");
+
+                bulkWrites.add(new UpdateOneModel<>(
+                        Filters.elemMatch("applications", Filters.eq("_id", applicationId)),
+                        Updates.pull("applications", Filters.eq("_id", application.getString("_id")))
+                ));
+            }
+
+            if (bulkWrites.isEmpty()) return;
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
             BulkWriteResult result = collection.bulkWrite(bulkWrites);
         } catch (Exception ex) {
             failedTasks.add(mongoTask);

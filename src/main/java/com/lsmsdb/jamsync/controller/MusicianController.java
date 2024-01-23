@@ -45,6 +45,16 @@ public class MusicianController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public Response deleteMusicianById(@PathVariable String id) {
+        try {
+            musicianService.deleteMusicianById(id);
+            return new Response(false,"", null);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
     @GetMapping("/{id}/followers")
     public Response getFollowersCount(@PathVariable String id) {
         try {

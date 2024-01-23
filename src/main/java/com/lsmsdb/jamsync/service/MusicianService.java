@@ -8,6 +8,8 @@ public interface MusicianService {
 
     Musician getMusicianById(String id) throws BusinessException;
 
+    Musician putMusicianById(String id, Musician musician) throws BusinessException;
+
     void deleteMusicianById(String id) throws BusinessException;
 
     Integer getFollowingCount(String _id) throws BusinessException;

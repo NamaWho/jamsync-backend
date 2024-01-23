@@ -5,6 +5,8 @@ import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
+import com.lsmsdb.jamsync.routine.MongoTask;
+import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -74,6 +76,47 @@ public class MusicianDAO {
         return null;
     }
 
+    public void deleteMusicianById(String id) throws DAOException {
+        // 1. Delete the musician from mongo
+        Document deletedDocument = null;
+        try {
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.MUSICIAN);
+            deletedDocument = collection.findOneAndDelete(eq("_id", id));
+            if (deletedDocument == null) {
+                throw new DAOException("Musician not found");
+            }
+        } catch(Exception ex) {
+            throw new DAOException(ex);
+        }
+
+        // 2. Add task to update redundancies in the background (eventual consistency)
+        MongoUpdater.getInstance().pushTask(new MongoTask("DELETE_MUSICIAN", deletedDocument));
+
+        // 3. Delete the musician from neo4j
+        // When deleting a Musician, we also need to delete the Opportunities he published with the application received for that opportunity, and the applications he sent for other opportunities
+        String formattedQuery = "MATCH (m:Musician {id: %s})\n" +
+                                "OPTIONAL MATCH (m)-[:PUBLISHED]->(o:Opportunity)\n" +
+                                "OPTIONAL MATCH (m)-[r:APPLIED_FOR]->(o2:Opportunity)\n" +
+                                "DETACH DELETE m, o\n" +
+                                "DELETE r\n";
+        String query = String.format(formattedQuery,
+                "\"" + id + "\"");
+
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            session.executeWrite(tx -> {
+                tx.run(query);
+                return null;
+            });
+        } catch (TransactionTerminatedException e) {
+            // Add this task to a queue to be executed later from the Neo4jConsistencyManager
+            System.out.println("Transaction terminated. Adding task to queue...");
+            Neo4jConsistencyManager.getInstance().pushOperation(query);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+    }
+
     public Integer getFollowingCount(String _id) throws DAOException{
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
 
@@ -129,4 +172,6 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
+
+
 }
