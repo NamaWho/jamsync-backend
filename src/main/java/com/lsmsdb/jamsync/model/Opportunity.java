@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 
 import java.time.LocalDate;
@@ -83,11 +84,12 @@ public class Opportunity {
         this.role = d.getString("role");
         this.instruments = (List<String>) d.get("instruments");
         this.genres = (List<String>) d.get("genres");
-        this.minimumAge = d.getInteger("minimumAge") == null ? 0 : d.getInteger("minimumAge");
-        this.maximumAge = d.getInteger("maximumAge") == null ? 0 : d.getInteger("maximumAge");
-        Object genderObj = d.get("gender");
-        this.gender = genderObj == null ? '-' : ((Character) genderObj);
-        // this.gender = d.getString("gender") == null ? '-' : d.getString("gender").charAt(0);
+        // parseInteger minimum and maximum age
+        this.minimumAge = d.getString("minimumAge") == null ? 0 : Integer.parseInt(d.getString("minimumAge"));
+        this.maximumAge = d.getString("maximumAge") == null ? 0 : Integer.parseInt(d.getString("maximumAge"));
+        //Object genderObj = d.get("gender");
+        //this.gender = genderObj == null ? '-' : ((Character) genderObj);
+        this.gender = (d.getString("gender") == null || d.getString("gender").isEmpty()) ? '-' : d.getString("gender").charAt(0);
 
         String creationDateTimeString = d.getString("createdAt");
         if(creationDateTimeString.length() > 10) {
@@ -104,15 +106,20 @@ public class Opportunity {
         }
 
         String expiresAtString = d.getString("expiresAt");
-        System.out.println(expiresAtString + " " + expiresAtString.length());
-        if(expiresAtString.length() > 10) {
-            this.expiresAt = LocalDateTime.parse(expiresAtString).toLocalDate();
+        if (expiresAtString == null) {
+            this.expiresAt = null;
         } else {
-            this.expiresAt = LocalDate.parse(expiresAtString);
+            if (expiresAtString.length() > 10) {
+                this.expiresAt = LocalDateTime.parse(expiresAtString).toLocalDate();
+            } else {
+                this.expiresAt = LocalDate.parse(expiresAtString);
+            }
         }
         this.visits = d.getInteger("visits");
         this.publisher = (Document) d.get("publisher");
+        LogManager.getLogger("OpportunityDAO.class").info("HERE GOES");
         this.applications = (List<Application>) d.get("applications");
+        LogManager.getLogger("OpportunityDAO.class").info("HERE GOES 2");
     }
 
     public Document toDocument() {

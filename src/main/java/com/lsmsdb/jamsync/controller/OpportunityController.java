@@ -6,6 +6,7 @@ import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.OpportunityService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.OpportunityServiceFactory;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +20,7 @@ public class OpportunityController {
     }
     @PostMapping("/")
     public Response createOpportunity(@RequestBody Opportunity opportunity) {
+        LogManager.getLogger().info("createOpportunity: " + opportunity);
         try {
             Opportunity o = opportunityService.createOpportunity(opportunity);
             return new Response(false,"", o);
@@ -29,6 +31,7 @@ public class OpportunityController {
 
     @GetMapping("/{id}")
     public Response getOpportunityById(@PathVariable String id) {
+        LogManager.getLogger().info("getOpportunityById: " + id);
         try {
             Opportunity o = opportunityService.getOpportunityById(id);
             return new Response(false,"", o);

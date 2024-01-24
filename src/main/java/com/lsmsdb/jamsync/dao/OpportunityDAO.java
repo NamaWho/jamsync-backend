@@ -9,6 +9,7 @@ import com.lsmsdb.jamsync.routine.MongoTask;
 import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
@@ -24,11 +25,13 @@ public class OpportunityDAO {
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
             cursor = collection.find(eq("_id", id)).iterator();
+            LogManager.getLogger("OpportunityDAO.class").info("OpportunityDAO.getOpportunityById() - " + id);
             if(cursor.hasNext()) {
                 Document document = cursor.next();
                 return new Opportunity(document);
             }
         } catch(Exception ex) {
+            LogManager.getLogger("OpportunityDAO.class").error(ex.getMessage());
             throw new DAOException(ex);
         } finally {
             if(cursor != null) cursor.close();
@@ -95,6 +98,7 @@ public class OpportunityDAO {
                 throw new Exception("Opportunity not found");
             }
         } catch(Exception ex) {
+            LogManager.getLogger("OpportunityDAO.class").error(ex.getMessage());
             throw new DAOException(ex);
         } finally {
             if(cursor != null)
@@ -118,10 +122,10 @@ public class OpportunityDAO {
             });
         } catch (TransactionTerminatedException e) {
             // Add this task to a queue to be executed later from the Neo4jConsistencyManager
-            System.out.println("Transaction terminated. Adding task to queue...");
+            LogManager.getLogger("OpportunityDAO.class").error(e.getMessage());
             Neo4jConsistencyManager.getInstance().pushOperation(query);
         } catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
+            LogManager.getLogger("OpportunityDAO.class").error(e.getMessage());
             throw new DAOException(e.getMessage());
         }
     }
