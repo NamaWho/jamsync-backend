@@ -71,6 +71,7 @@ public class MongoUpdater {
                     createApplication(mongoTask);
                     break;
                 case "DELETE_APPLICATION":
+                    deleteApplication(mongoTask);
                     break;
                 case "CREATE_OPPORTUNITY":
                     createOpportunity(mongoTask);
@@ -117,6 +118,38 @@ public class MongoUpdater {
                 applicationEntry.put("createdAt", application.getString("createdAt"));
                 applicationEntry.put("title", application.getString("title"));
                 applications.add(applicationEntry);
+                // update the applications array
+                document.put("applications", applications);
+                // update the applicant document
+                collection.updateOne(eq("_id", applicantId), new Document("$set", document));
+            }
+        } catch (Exception ex) {
+            failedTasks.add(mongoTask);
+            LogManager.getLogger("MongoUpdater").error(ex.getMessage());
+        } finally {
+            if(cursor != null)
+                cursor.close();
+        }
+    }
+
+    private void deleteApplication(MongoTask mongoTask){
+        LogManager.getLogger("MongoUpdater").info("deleteApplication routine started...");
+        Document application = mongoTask.getDocument();
+        Document applicant = (Document) application.get("applicant");
+        String applicantId = applicant.getString("_id");
+        String applicantType = applicant.getString("type");
+
+        MongoCursor<Document> cursor = null;
+        try {
+            // 1. remove application from the applicant document
+            MongoCollectionsEnum collectionName = MongoCollectionsEnum.valueOf(applicantType.toUpperCase());
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(collectionName);
+            cursor = collection.find(eq("_id", applicantId)).iterator();
+            if(cursor.hasNext()) {
+                Document document = cursor.next();
+                List<Document> applications = (List<Document>) document.get("applications");
+                // remove the application
+                applications.removeIf(a -> a.getString("_id").equals(application.getString("_id")));
                 // update the applications array
                 document.put("applications", applications);
                 // update the applicant document
