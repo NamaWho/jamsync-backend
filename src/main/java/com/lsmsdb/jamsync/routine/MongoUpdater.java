@@ -6,6 +6,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.lsmsdb.jamsync.dao.BandDAO;
+import com.lsmsdb.jamsync.dao.MusicianDAO;
+import com.lsmsdb.jamsync.dao.OpportunityDAO;
+import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
 import com.mongodb.bulk.BulkWriteResult;
@@ -16,18 +20,23 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.WriteModel;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 
 import static com.mongodb.client.model.Filters.eq;
 
 public class MongoUpdater {
     private static final MongoUpdater updater = new MongoUpdater();
+
+    private final static MusicianDAO musicianDAO = new MusicianDAO();
+    private final static BandDAO bandDAO = new BandDAO();
+    private final static OpportunityDAO opportunityDAO = new OpportunityDAO();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private List<MongoTask> updateTasks = new ArrayList<MongoTask>();
     private List<MongoTask> failedTasks = new ArrayList<MongoTask>();
 
     private MongoUpdater() {
-        System.out.println("MongoUpdater ready...");
+        LogManager.getLogger("MongoUpdater").info("MongoUpdater constructor called...");
         // Schedule the updater to run every 2 minutes
         scheduler.scheduleAtFixedRate(this::updateMongoData, 0, 10, TimeUnit.SECONDS);
     }
@@ -53,7 +62,7 @@ public class MongoUpdater {
     }
 
     private void updateMongoData() {
-        System.out.println("Updating MongoDB data...");
+        LogManager.getLogger("MongoUpdater").info("updateMongoData routine started...");
         retryFailedTasks();
 
         MongoTask mongoTask = popTask();
@@ -72,9 +81,9 @@ public class MongoUpdater {
                     deleteOpportunity(mongoTask);
                     break;
                 case "UPDATE_MUSICIAN":
-                    deleteMusician(mongoTask);
                     break;
                 case "DELETE_MUSICIAN":
+                    deleteMusician(mongoTask);
                     break;
                 case "UPDATE_BAND":
                     break;
@@ -93,7 +102,7 @@ public class MongoUpdater {
      * @param mongoTask
      */
     private void createOpportunity(MongoTask mongoTask) {
-        System.out.println("createOpportunity routine started...");
+        LogManager.getLogger("MongoUpdater").info("createOpportunity routine started...");
         Document opportunity = mongoTask.getDocument();
         Document publisher = (Document) opportunity.get("publisher");
         String publisherId = publisher.getString("_id");
@@ -121,7 +130,7 @@ public class MongoUpdater {
             }
         } catch (Exception ex) {
             failedTasks.add(mongoTask);
-            System.out.println(ex.getMessage());
+            LogManager.getLogger("MongoUpdater").error(ex.getMessage());
         } finally {
             if(cursor != null)
                 cursor.close();
@@ -129,9 +138,8 @@ public class MongoUpdater {
     }
 
     private void deleteOpportunity(MongoTask mongoTask) {
-        System.out.println("deleteOpportunity routine started...");
+        LogManager.getLogger("MongoUpdater").info("deleteOpportunity routine started...");
         Document opportunity = mongoTask.getDocument();
-        System.out.println(opportunity);
         MongoCursor<Document> cursor = null;
 
         try {
@@ -175,26 +183,23 @@ public class MongoUpdater {
             BulkWriteResult result = collection.bulkWrite(bulkWrites);
         } catch (Exception ex) {
             failedTasks.add(mongoTask);
-            System.out.println(ex.getMessage());
+            LogManager.getLogger("MongoUpdater").error(ex.getMessage());
         }
     }
 
     private void deleteMusician(MongoTask mongoTask){
-        System.out.println("deleteMusician routine started...");
+        LogManager.getLogger("MongoUpdater").info("deleteMusician routine started...");
         Document musician = mongoTask.getDocument();
-        System.out.println(musician);
         MongoCursor<Document> cursor = null;
 
         try {
-            // 1. remove all the opportunities published by the musician.
-            // Use the deleteOpportunity routine
+            // 1. remove all the opportunities published by the musician
             List<Document> opportunities = (List<Document>) musician.get("opportunities");
             for(Document opportunity : opportunities) {
-                MongoTask task = new MongoTask("DELETE_OPPORTUNITY", opportunity);
-                deleteOpportunity(task);
+                opportunityDAO.deleteOpportunityById(opportunity.getString("_id"));
             }
 
-            // 2. remove musician from the applications documents in the opportunities documents
+            // 2. remove musician's applications in the opportunities documents
             List<WriteModel<Document>> bulkWrites = new ArrayList<>();
             List<Document> applications = (List<Document>) musician.get("applications");
             for(Document application : applications) {
@@ -211,7 +216,7 @@ public class MongoUpdater {
             BulkWriteResult result = collection.bulkWrite(bulkWrites);
         } catch (Exception ex) {
             failedTasks.add(mongoTask);
-            System.out.println(ex.getMessage());
+            LogManager.getLogger("MongoUpdater").error(ex.getMessage());
         }
     }
 

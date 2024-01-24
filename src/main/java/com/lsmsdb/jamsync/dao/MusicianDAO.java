@@ -10,6 +10,8 @@ import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import lombok.extern.java.Log;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
@@ -83,9 +85,11 @@ public class MusicianDAO {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.MUSICIAN);
             deletedDocument = collection.findOneAndDelete(eq("_id", id));
             if (deletedDocument == null) {
+                LogManager.getLogger("MusicianDAO").warn("Musician not found with id " + id + " in MongoDB");
                 throw new DAOException("Musician not found");
             }
         } catch(Exception ex) {
+            LogManager.getLogger("MusicianDAO").error("Error while deleting musician with id " + id + " in MongoDB");
             throw new DAOException(ex);
         }
 
@@ -109,10 +113,10 @@ public class MusicianDAO {
             });
         } catch (TransactionTerminatedException e) {
             // Add this task to a queue to be executed later from the Neo4jConsistencyManager
-            System.out.println("Transaction terminated. Adding task to queue...");
+            LogManager.getLogger("MusicianDAO").error("Transaction terminated. Adding task to queue...");
             Neo4jConsistencyManager.getInstance().pushOperation(query);
         } catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
+            LogManager.getLogger("MusicianDAO").error("Exception: " + e.getMessage());
             throw new DAOException(e.getMessage());
         }
     }

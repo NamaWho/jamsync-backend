@@ -6,6 +6,7 @@ import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.factory.MusicianServiceFactory;
 import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.web.bind.annotation.*;
 import com.lsmsdb.jamsync.service.MusicianService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
@@ -47,6 +48,7 @@ public class MusicianController {
 
     @DeleteMapping("/{id}")
     public Response deleteMusicianById(@PathVariable String id) {
+        LogManager.getLogger("MusicianController").info("Deleting musician with id " + id);
         try {
             musicianService.deleteMusicianById(id);
             return new Response(false,"", null);

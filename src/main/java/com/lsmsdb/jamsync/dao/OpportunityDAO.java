@@ -95,10 +95,11 @@ public class OpportunityDAO {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
             deletedDocument = collection.findOneAndDelete(eq("_id", id));
             if (deletedDocument == null) {
+                LogManager.getLogger("OpportunityDAO").warn("Opportunity not found with id " + id + " in MongoDB");
                 throw new Exception("Opportunity not found");
             }
         } catch(Exception ex) {
-            LogManager.getLogger("OpportunityDAO.class").error(ex.getMessage());
+            LogManager.getLogger("OpportunityDAO").error(ex.getMessage());
             throw new DAOException(ex);
         } finally {
             if(cursor != null)
@@ -122,10 +123,10 @@ public class OpportunityDAO {
             });
         } catch (TransactionTerminatedException e) {
             // Add this task to a queue to be executed later from the Neo4jConsistencyManager
-            LogManager.getLogger("OpportunityDAO.class").error(e.getMessage());
+            LogManager.getLogger("OpportunityDAO").warn(e.getMessage());
             Neo4jConsistencyManager.getInstance().pushOperation(query);
         } catch (Exception e) {
-            LogManager.getLogger("OpportunityDAO.class").error(e.getMessage());
+            LogManager.getLogger("OpportunityDAO").error(e.getMessage());
             throw new DAOException(e.getMessage());
         }
     }

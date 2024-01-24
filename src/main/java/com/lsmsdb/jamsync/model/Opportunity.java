@@ -117,9 +117,7 @@ public class Opportunity {
         }
         this.visits = d.getInteger("visits");
         this.publisher = (Document) d.get("publisher");
-        LogManager.getLogger("OpportunityDAO.class").info("HERE GOES");
         this.applications = (List<Application>) d.get("applications");
-        LogManager.getLogger("OpportunityDAO.class").info("HERE GOES 2");
     }
 
     public Document toDocument() {
