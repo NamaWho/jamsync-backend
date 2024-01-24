@@ -47,6 +47,16 @@ public class BandController {
         }
     }
 
+    @PutMapping("/{id}")
+    public Response updateBandById(@PathVariable String id, @RequestBody Band band) {
+        try {
+            Band b = bandService.updateBandById(id, band);
+            return new Response(false,"", b);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public Response deleteBandById(@PathVariable String id) {
         LogManager.getLogger(BandController.class).info("Deleting band with id: " + id);

@@ -75,6 +75,64 @@ public class BandDAO {
         return null;
     }
 
+    public Band updateBandById(String id, Band band) throws DAOException {
+        // 1. Update the band in mongo
+        Document updatedDocument = null;
+        Document oldDocument = null;
+        Document newDocument = null;
+        try {
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.BAND);
+
+            // retrieve the old document
+            MongoCursor<Document> cursor = collection.find(eq("_id", id)).iterator();
+            if(cursor.hasNext())
+                oldDocument = cursor.next();
+            else {
+                LogManager.getLogger("BandDAO").warn("Band not found with id " + id + " in MongoDB");
+                throw new DAOException("Band not found");
+            }
+
+            newDocument = band.toDocument();
+            newDocument.put("credentials", oldDocument.get("credentials"));
+            updatedDocument = collection.findOneAndReplace(eq("_id", id), newDocument);
+            if (updatedDocument == null) {
+                LogManager.getLogger("BandDAO").warn("Band not found with id " + id + " in MongoDB");
+                throw new DAOException("Band not found");
+            }
+        } catch(Exception ex) {
+            LogManager.getLogger("BandDAO").error("Error while updating band with id " + id + " in MongoDB");
+            throw new DAOException(ex);
+        }
+
+        // 2. Add task to update redundancies in the background (eventual consistency)
+        MongoUpdater.getInstance().pushTask(new MongoTask("UPDATE_BAND", updatedDocument));
+
+        // 3. Update the band in neo4j
+        String formattedQuery = "MATCH (b:Band {_id: %s})\n" +
+                "SET b.username = %s, b.genres = %s\n" +
+                "RETURN b;";
+        String query = String.format(formattedQuery,
+                "\"" + id + "\"",
+                "\"" + band.getUsername() + "\"",
+                "\"" + band.getGenres() + "\"");
+
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            session.executeWrite(tx -> {
+                tx.run(query);
+                return null;
+            });
+        } catch (TransactionTerminatedException e) {
+            // Add this task to a queue to be executed later from the Neo4jConsistencyManager
+            LogManager.getLogger("BandDAO").error("Transaction terminated. Adding task to queue...");
+            Neo4jConsistencyManager.getInstance().pushOperation(query);
+        } catch (Exception e) {
+            LogManager.getLogger("BandDAO").error("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+
+        return band;
+    }
+
     public void deleteBandById(String id) throws DAOException {
         // 1. Delete the band from mongo
         Document deletedDocument = null;
