@@ -25,7 +25,6 @@ public class OpportunityDAO {
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
             cursor = collection.find(eq("_id", id)).iterator();
-            LogManager.getLogger("OpportunityDAO.class").info("OpportunityDAO.getOpportunityById() - " + id);
             if(cursor.hasNext()) {
                 Document document = cursor.next();
                 return new Opportunity(document);

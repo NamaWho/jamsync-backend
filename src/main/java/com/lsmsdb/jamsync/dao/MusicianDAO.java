@@ -98,7 +98,7 @@ public class MusicianDAO {
 
         // 3. Delete the musician from neo4j
         // When deleting a Musician, we also need to delete the Opportunities he published with the application received for that opportunity, and the applications he sent for other opportunities
-        String formattedQuery = "MATCH (m:Musician {id: %s})\n" +
+        String formattedQuery = "MATCH (m:Musician {_id: %s})\n" +
                                 "OPTIONAL MATCH (m)-[:PUBLISHED]->(o:Opportunity)\n" +
                                 "OPTIONAL MATCH (m)-[r:APPLIED_FOR]->(o2:Opportunity)\n" +
                                 "DETACH DELETE m, o\n" +

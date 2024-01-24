@@ -88,6 +88,7 @@ public class MongoUpdater {
                 case "UPDATE_BAND":
                     break;
                 case "DELETE_BAND":
+                    deleteBand(mongoTask);
                     break;
                 default:
                     break;
@@ -190,7 +191,6 @@ public class MongoUpdater {
     private void deleteMusician(MongoTask mongoTask){
         LogManager.getLogger("MongoUpdater").info("deleteMusician routine started...");
         Document musician = mongoTask.getDocument();
-        MongoCursor<Document> cursor = null;
 
         try {
             // 1. remove all the opportunities published by the musician
@@ -202,6 +202,39 @@ public class MongoUpdater {
             // 2. remove musician's applications in the opportunities documents
             List<WriteModel<Document>> bulkWrites = new ArrayList<>();
             List<Document> applications = (List<Document>) musician.get("applications");
+            for(Document application : applications) {
+                String applicationId = application.getString("_id");
+
+                bulkWrites.add(new UpdateOneModel<>(
+                        Filters.elemMatch("applications", Filters.eq("_id", applicationId)),
+                        Updates.pull("applications", Filters.eq("_id", application.getString("_id")))
+                ));
+            }
+
+            if (bulkWrites.isEmpty()) return;
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+            BulkWriteResult result = collection.bulkWrite(bulkWrites);
+        } catch (Exception ex) {
+            failedTasks.add(mongoTask);
+            LogManager.getLogger("MongoUpdater").error(ex.getMessage());
+        }
+    }
+
+    private void deleteBand(MongoTask mongoTask){
+        LogManager.getLogger(MongoUpdater.class).info("deleteBand routine started...");
+        Document band = mongoTask.getDocument();
+        MongoCursor<Document> cursor = null;
+
+        try {
+            // 1. remove all the opportunities published by the band
+            List<Document> opportunities = (List<Document>) band.get("opportunities");
+            for(Document opportunity : opportunities) {
+                opportunityDAO.deleteOpportunityById(opportunity.getString("_id"));
+            }
+
+            // 2. remove band's applications in the opportunities documents
+            List<WriteModel<Document>> bulkWrites = new ArrayList<>();
+            List<Document> applications = (List<Document>) band.get("applications");
             for(Document application : applications) {
                 String applicationId = application.getString("_id");
 

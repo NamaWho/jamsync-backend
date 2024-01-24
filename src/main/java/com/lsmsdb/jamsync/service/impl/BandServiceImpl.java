@@ -28,6 +28,15 @@ public class BandServiceImpl implements BandService {
     }
 
     @Override
+    public void deleteBandById(String id) throws BusinessException {
+        try {
+            bandDAO.deleteBandById(id);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
     public boolean addMember(String bandId, String memberId) throws BusinessException {
         //TODO: Implement this method
         return false;

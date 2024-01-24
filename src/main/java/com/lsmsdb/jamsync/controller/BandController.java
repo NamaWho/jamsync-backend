@@ -8,6 +8,7 @@ import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.BandServiceFactory;
 import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,6 +42,17 @@ public class BandController {
         try {
             Band b = bandService.getBandById(id);
             return new Response(false, null, b);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public Response deleteBandById(@PathVariable String id) {
+        LogManager.getLogger(BandController.class).info("Deleting band with id: " + id);
+        try {
+            bandService.deleteBandById(id);
+            return new Response(false,"", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
