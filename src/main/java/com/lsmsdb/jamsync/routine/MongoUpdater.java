@@ -80,6 +80,7 @@ public class MongoUpdater {
                     deleteOpportunity(mongoTask);
                     break;
                 case "UPDATE_MUSICIAN":
+                    updateMusician(mongoTask);
                     break;
                 case "DELETE_MUSICIAN":
                     deleteMusician(mongoTask);
@@ -249,6 +250,50 @@ public class MongoUpdater {
             if (bulkWrites.isEmpty()) return;
             collection = MongoDriver.getInstance().getCollection(collectionName);
             BulkWriteResult result = collection.bulkWrite(bulkWrites);
+        } catch (Exception ex) {
+            failedTasks.add(mongoTask);
+            LogManager.getLogger("MongoUpdater").error(ex.getMessage());
+        }
+    }
+
+    private void updateMusician(MongoTask mongoTask){
+        LogManager.getLogger("MongoUpdater").info("updateMusician routine started...");
+        Document musician = mongoTask.getDocument();
+
+        try {
+            // 1. update the musician's data in his applications among the opportunities documents
+            List<WriteModel<Document>> bulkWrites = new ArrayList<>();
+            Document newApplicant = new Document();
+            newApplicant.put("_id", musician.getString("_id"));
+            newApplicant.put("username", musician.getString("username"));
+            newApplicant.put("profilePictureUrl", musician.getString("profilePictureUrl"));
+            newApplicant.put("contactEmail", musician.getString("contactEmail"));
+            List<Document> applications = (List<Document>) musician.get("applications");
+            for(Document application : applications) {
+                bulkWrites.add(new UpdateOneModel<>(
+                        Filters.elemMatch("applications", Filters.eq("_id", application.getString("_id"))),
+                        Updates.set("applications.$.applicant", newApplicant)
+                ));
+            }
+
+            // 2. update the musician's data in his published opportunities
+            List<Document> opportunities = (List<Document>) musician.get("opportunities");
+            Document newPublisher = new Document();
+            newPublisher.put("_id", musician.getString("_id"));
+            newPublisher.put("type", "Musician");
+            newPublisher.put("username", musician.getString("username"));
+            newPublisher.put("profilePictureUrl", musician.getString("profilePictureUrl"));
+            for(Document opportunity : opportunities) {
+                bulkWrites.add(new UpdateOneModel<>(
+                        Filters.eq("_id", opportunity.getString("_id")),
+                        Updates.set("publisher", newPublisher)
+                ));
+            }
+
+            if (!bulkWrites.isEmpty()){
+                MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+                BulkWriteResult result = collection.bulkWrite(bulkWrites);
+            }
         } catch (Exception ex) {
             failedTasks.add(mongoTask);
             LogManager.getLogger("MongoUpdater").error(ex.getMessage());
