@@ -8,7 +8,7 @@ public interface MusicianService {
 
     Musician getMusicianById(String id) throws BusinessException;
 
-    Musician putMusicianById(String id, Musician musician) throws BusinessException;
+    Musician updateMusicianById(String id, Musician musician) throws BusinessException;
 
     void deleteMusicianById(String id) throws BusinessException;
 
@@ -17,4 +17,5 @@ public interface MusicianService {
     void follow(String id, String followedId, String type) throws BusinessException;
 
     void unfollow(String id, String followedId, String type) throws BusinessException;
+
 }

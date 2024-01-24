@@ -78,6 +78,65 @@ public class MusicianDAO {
         return null;
     }
 
+    public Musician updateMusicianById(String id, Musician musician) throws DAOException {
+        // 1. Update the musician in mongo
+        Document updatedDocument = null;
+        Document oldDocument = null;
+        Document newDocument = null;
+        try {
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.MUSICIAN);
+
+            // retrieve the old document
+            MongoCursor<Document> cursor = collection.find(eq("_id", id)).iterator();
+            if(cursor.hasNext())
+                oldDocument = cursor.next();
+            else {
+                LogManager.getLogger("MusicianDAO").warn("Musician not found with id " + id + " in MongoDB");
+                throw new DAOException("Musician not found");
+            }
+
+            newDocument = musician.toDocument();
+            newDocument.put("credentials", oldDocument.get("credentials"));
+            updatedDocument = collection.findOneAndReplace(eq("_id", id), newDocument);
+            if (updatedDocument == null) {
+                LogManager.getLogger("MusicianDAO").warn("Musician not found with id " + id + " in MongoDB");
+                throw new DAOException("Musician not found");
+            }
+        } catch(Exception ex) {
+            LogManager.getLogger("MusicianDAO").error("Error while updating musician with id " + id + " in MongoDB");
+            throw new DAOException(ex);
+        }
+
+        // 2. Add task to update redundancies in the background (eventual consistency)
+        MongoUpdater.getInstance().pushTask(new MongoTask("UPDATE_MUSICIAN", updatedDocument));
+
+        // 3. Update the musician in neo4j
+        String formattedQuery = "MATCH (m:Musician {_id: %s})\n" +
+                                "SET m.username = %s, m.genres = %s, m.instruments = %s\n" +
+                                "RETURN m;";
+        String query = String.format(formattedQuery,
+                                    "\"" + id + "\"",
+                                    "\"" + musician.getUsername() + "\"",
+                                    "\"" + musician.getGenres() + "\"",
+                                    "\"" + musician.getInstruments() + "\"");
+
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            session.executeWrite(tx -> {
+                tx.run(query);
+                return null;
+            });
+        } catch (TransactionTerminatedException e) {
+            // Add this task to a queue to be executed later from the Neo4jConsistencyManager
+            LogManager.getLogger("MusicianDAO").error("Transaction terminated. Adding task to queue...");
+            Neo4jConsistencyManager.getInstance().pushOperation(query);
+        } catch (Exception e) {
+            LogManager.getLogger("MusicianDAO").error("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+
+        return musician;
+    }
+
     public void deleteMusicianById(String id) throws DAOException {
         // 1. Delete the musician from mongo
         Document deletedDocument = null;

@@ -46,6 +46,16 @@ public class MusicianController {
         }
     }
 
+    @PutMapping("/{id}")
+    public Response updateMusicianById(@PathVariable String id, @RequestBody Musician musician) {
+        try {
+            Musician m = musicianService.updateMusicianById(id, musician);
+            return new Response(false,"", m);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public Response deleteMusicianById(@PathVariable String id) {
         LogManager.getLogger("MusicianController").info("Deleting musician with id " + id);
