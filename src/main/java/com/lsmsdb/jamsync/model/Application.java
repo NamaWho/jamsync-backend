@@ -17,6 +17,7 @@ public class Application {
     private Document applicant; // Represented as a Document
     private String text;
     private Integer status;
+    private String opportunityId;
 
     public Application(Document d) {
         this._id = d.getString("_id");

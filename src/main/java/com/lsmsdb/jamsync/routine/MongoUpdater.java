@@ -27,7 +27,6 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class MongoUpdater {
     private static final MongoUpdater updater = new MongoUpdater();
-
     private final static MusicianDAO musicianDAO = new MusicianDAO();
     private final static BandDAO bandDAO = new BandDAO();
     private final static OpportunityDAO opportunityDAO = new OpportunityDAO();
@@ -69,8 +68,7 @@ public class MongoUpdater {
         while (mongoTask != null) {
             switch (mongoTask.getOperation()) {
                 case "CREATE_APPLICATION":
-                    break;
-                case "UPDATE_APPLICATION":
+                    createApplication(mongoTask);
                     break;
                 case "DELETE_APPLICATION":
                     break;
@@ -94,6 +92,42 @@ public class MongoUpdater {
                     break;
             }
             mongoTask = popTask();
+        }
+    }
+
+    private void createApplication(MongoTask mongoTask){
+        LogManager.getLogger("MongoUpdater").info("createApplication routine started...");
+        Document application = mongoTask.getDocument();
+        Document applicant = (Document) application.get("applicant");
+        String applicantId = applicant.getString("_id");
+        String applicantType = applicant.getString("type");
+
+        MongoCursor<Document> cursor = null;
+        try {
+            // 1. update the applications array in the applicant document
+            MongoCollectionsEnum collectionName = MongoCollectionsEnum.valueOf(applicantType.toUpperCase());
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(collectionName);
+            cursor = collection.find(eq("_id", applicantId)).iterator();
+            if(cursor.hasNext()) {
+                Document document = cursor.next();
+                List<Document> applications = (List<Document>) document.get("applications");
+                // add the new application
+                Document applicationEntry = new Document();
+                applicationEntry.put("_id", application.getString("_id"));
+                applicationEntry.put("createdAt", application.getString("createdAt"));
+                applicationEntry.put("title", application.getString("title"));
+                applications.add(applicationEntry);
+                // update the applications array
+                document.put("applications", applications);
+                // update the applicant document
+                collection.updateOne(eq("_id", applicantId), new Document("$set", document));
+            }
+        } catch (Exception ex) {
+            failedTasks.add(mongoTask);
+            LogManager.getLogger("MongoUpdater").error(ex.getMessage());
+        } finally {
+            if(cursor != null)
+                cursor.close();
         }
     }
 
