@@ -71,6 +71,7 @@ public class ApplicationDAO {
             String type = publisher.getString("type");
             String applicantType = type.equalsIgnoreCase("band") ? "Musician" : "Band";
             applicationDocument.append("applicantType", applicantType);
+            applicationDocument.append("opportunityTitle", updatedDocument.getString("title"));
             MongoUpdater.getInstance().pushTask(new MongoTask("CREATE_APPLICATION", applicationDocument));
 
             // 3. Add application to Neo4j
@@ -78,7 +79,7 @@ public class ApplicationDAO {
             String formattedQuery = "MATCH (o:Opportunity {_id: %s}), (u:%s {_id: %s}) " + "CREATE (u)-[:APPLIED_FOR]->(o)";
             String query = String.format(formattedQuery,
                     "\"" + opportunityId + "\"",
-                    "\"" + applicantType + "\"",
+                    applicantType,
                     "\"" + application.getApplicant().getString("_id") + "\"");
 
             try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
@@ -125,7 +126,7 @@ public class ApplicationDAO {
             String formattedQuery = "MATCH (u:%s {_id: %s})-[r:APPLIED_FOR]->(o:Opportunity {_id: %s}) " +
                     "DELETE r";
             String query = String.format(formattedQuery,
-                    "\"" + applicantType + "\"",
+                    applicantType,
                     "\"" + ((Document)applicationDocument.get("applicant")).getString("_id") + "\"",
                     "\"" + opportunityId + "\"");
 
