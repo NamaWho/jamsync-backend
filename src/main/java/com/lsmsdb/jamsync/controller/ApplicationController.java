@@ -2,6 +2,7 @@ package com.lsmsdb.jamsync.controller;
 
 import com.lsmsdb.jamsync.controller.response.Response;
 import com.lsmsdb.jamsync.model.Application;
+import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.ApplicationService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.ApplicationServiceFactory;
@@ -17,14 +18,13 @@ public class ApplicationController {
         this.applicationService = ApplicationServiceFactory.create().getService();
     }
 
-    @GetMapping("/{opportunityId}/{applicationId}")
+    @GetMapping("/{applicationId}")
     public Response getApplicationById(
-            @PathVariable String opportunityId,
             @PathVariable String applicationId
     ) {
         try {
-            Application application = applicationService.getApplicationById(opportunityId, applicationId);
-            return new Response(false, null, application);
+            Opportunity opportunity = applicationService.getApplicationById(applicationId);
+            return new Response(false, null, opportunity);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }

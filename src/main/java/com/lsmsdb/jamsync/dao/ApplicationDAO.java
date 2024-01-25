@@ -2,6 +2,7 @@ package com.lsmsdb.jamsync.dao;
 
 import com.lsmsdb.jamsync.dao.exception.DAOException;
 import com.lsmsdb.jamsync.model.Application;
+import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
@@ -18,12 +19,11 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class ApplicationDAO {
 
-    public Application getApplicationById(String opportunityId, String applicationId) throws DAOException {
+    public Opportunity getApplicationById(String applicationId) throws DAOException {
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
 
-            MongoCursor<Document> cursor = collection.find(
-                    new Document("_id", opportunityId).append("applications._id", applicationId)).iterator();
+            MongoCursor<Document> cursor = collection.find(new Document("applications._id", applicationId)).iterator();
 
             if (cursor.hasNext()) {
                 Document opportunityDocument = cursor.next();
@@ -39,10 +39,10 @@ public class ApplicationDAO {
                     opportunityDocument.remove("applications");
                     opportunityDocument.append("applications", List.of(applicationDocument));
 
-                    applications.removeIf(appDoc -> !applicationId.equals(appDoc.getString("_id")));
-
-                    return new Application(applicationDocument);
+                    return new Opportunity(opportunityDocument);
                 }
+            } else {
+                throw new DAOException("Application not found");
             }
         } catch (Exception ex) {
             throw new DAOException(ex);
