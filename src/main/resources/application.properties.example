@@ -1,7 +1,0 @@
-neo4j.uri=bolt://localhost:7687
-neo4j.username=neo4j
-neo4j.password=password
-
-mongo.host=localhost
-mongo.port=27017
-mongo.database=databasename
