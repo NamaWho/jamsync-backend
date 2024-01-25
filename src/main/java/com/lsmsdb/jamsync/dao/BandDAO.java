@@ -14,6 +14,7 @@ import com.mongodb.client.MongoCursor;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.neo4j.driver.Session;
+import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
 
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
@@ -175,10 +176,28 @@ public class BandDAO {
             throw new DAOException(e.getMessage());
         }
     }
-
-
     public boolean addMember(String bandId, String musicianId) throws DAOException {
-        //TODO: implement
-        return false;
+        String query = null;
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            query = "MATCH (b:Band {_id: $bandId}), (m:Musician {_id: $musicianId})" +
+                    "CREATE (b)-[:MEMBER_OF]->(m)";
+
+            String finalQuery = query;
+            session.executeWrite(tx -> {
+                tx.run(finalQuery, Values.parameters("bandId", bandId, "musicianId", musicianId));
+                return null;
+            });
+
+            return true;
+        } catch (TransactionTerminatedException e) {
+            // Add this task to a queue to be executed later from the Neo4jConsistencyManager
+            LogManager.getLogger(BandDAO.class).error("Transaction terminated. Adding task to queue...");
+            Neo4jConsistencyManager.getInstance().pushOperation(query);
+            return false;
+        } catch (Exception e) {
+            LogManager.getLogger(BandDAO.class).error("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
     }
+
 }

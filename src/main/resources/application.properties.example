@@ -1,7 +1,7 @@
-neo4j.uri=bolt://localhost:7687
+neo4j.uri=bolt://localhost:7689
 neo4j.username=neo4j
-neo4j.password=yourpassword
+neo4j.password=omrani8128
 
 mongo.host=localhost
 mongo.port=27017
-mongo.database=yourdatabasename
+mongo.database=jamsync
