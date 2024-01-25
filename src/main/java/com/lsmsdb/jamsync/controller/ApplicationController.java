@@ -2,6 +2,7 @@ package com.lsmsdb.jamsync.controller;
 
 import com.lsmsdb.jamsync.controller.response.Response;
 import com.lsmsdb.jamsync.model.Application;
+import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.ApplicationService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.ApplicationServiceFactory;
@@ -17,23 +18,22 @@ public class ApplicationController {
         this.applicationService = ApplicationServiceFactory.create().getService();
     }
 
-    @GetMapping("/{opportunityId}/{applicationId}")
+    @GetMapping("/{applicationId}")
     public Response getApplicationById(
-            @PathVariable String opportunityId,
             @PathVariable String applicationId
     ) {
         try {
-            Application application = applicationService.getApplicationById(opportunityId, applicationId);
-            return new Response(false, null, application);
+            Opportunity opportunity = applicationService.getApplicationById(applicationId);
+            return new Response(false, null, opportunity);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
     }
 
-    @PostMapping("/{opportunityId}")
+    @PostMapping("/")
     public Response createApplication(
-            @PathVariable String opportunityId,
-            @RequestBody Application application
+            @RequestBody Application application,
+            @RequestParam String opportunityId
     ) {
         try {
             Application createdApplication = applicationService.createApplication(opportunityId, application);
@@ -43,10 +43,10 @@ public class ApplicationController {
         }
     }
 
-    @DeleteMapping("/{opportunityId}/{applicationId}")
+    @DeleteMapping("/{applicationId}")
     public Response deleteApplication(
-            @PathVariable String opportunityId,
-            @PathVariable String applicationId
+            @PathVariable String applicationId,
+            @RequestParam String opportunityId
     ) {
         try {
             applicationService.deleteApplication(opportunityId, applicationId);

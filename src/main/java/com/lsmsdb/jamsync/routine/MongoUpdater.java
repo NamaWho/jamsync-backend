@@ -103,7 +103,7 @@ public class MongoUpdater {
         Document application = mongoTask.getDocument();
         Document applicant = (Document) application.get("applicant");
         String applicantId = applicant.getString("_id");
-        String applicantType = applicant.getString("type");
+        String applicantType = application.getString("applicantType");
 
         MongoCursor<Document> cursor = null;
         try {
@@ -139,7 +139,7 @@ public class MongoUpdater {
         Document application = mongoTask.getDocument();
         Document applicant = (Document) application.get("applicant");
         String applicantId = applicant.getString("_id");
-        String applicantType = applicant.getString("type");
+        String applicantType = application.getString("applicantType");
 
         MongoCursor<Document> cursor = null;
         try {
