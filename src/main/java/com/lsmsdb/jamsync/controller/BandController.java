@@ -52,6 +52,7 @@ public class BandController {
 
     @PutMapping("/{id}")
     public Response updateBandById(@PathVariable String id, @RequestBody Band band) {
+        LogManager.getLogger(BandController.class).info("Updating band with id " + id);
         try {
             Band b = bandService.updateBandById(id, band);
             return new Response(false,"", b);
