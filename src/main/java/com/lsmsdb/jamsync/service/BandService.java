@@ -9,6 +9,6 @@ public interface BandService {
     Band updateBandById(String id, Band band) throws BusinessException;
     void deleteBandById(String id) throws BusinessException;
 
-    boolean addMember(String bandId, String memberId) throws BusinessException;
+    boolean addMember(String id, String memberId) throws BusinessException;
 
 }

@@ -8,14 +8,17 @@ import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.BandServiceFactory;
 import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
+import com.lsmsdb.jamsync.service.MusicianService;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api/bands")
 public class BandController {
 
     private BandService bandService;
+    private MusicianService musicianService;
     private RegisteredUserService registeredUserService;
 
     public BandController(){
@@ -77,10 +80,26 @@ public class BandController {
             return new Response(true, ex.getMessage(), null);
         }
     }
-
     @PostMapping("/{id}/member")
     public Response addMember(@PathVariable String id, @RequestParam String memberId) {
-        // TODO: implement
-        return null;
+        try {
+            if (id == null || memberId == null || id.isEmpty() || memberId.isEmpty()) {
+                return new Response(true, "Band ID and Musician ID are required", null);
+            }
+
+            String band = String.valueOf(bandService.getBandById(id));
+            if (band == null) {
+                return new Response(true, "Band not found", null);
+            }
+            Musician musician = musicianService.getMusicianById(memberId);
+            if (musician == null) {
+                return new Response(true, "Musician not found", null);
+            }
+            bandService.addMember(band, String.valueOf(musician));
+
+            return new Response(false, "", null);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
     }
 }
