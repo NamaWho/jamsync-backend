@@ -67,12 +67,14 @@ public class ApplicationDAO {
                     new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
 
             // 2. Add task to queue for update redundancies
-            MongoUpdater.getInstance().pushTask(new MongoTask("CREATE_APPLICATION", applicationDocument));
-
-            // 3. Add application to Neo4j
             Document publisher = updatedDocument.get("publisher", Document.class);
             String type = publisher.getString("type");
             String applicantType = type.equalsIgnoreCase("band") ? "Musician" : "Band";
+            applicationDocument.append("applicantType", applicantType);
+            MongoUpdater.getInstance().pushTask(new MongoTask("CREATE_APPLICATION", applicationDocument));
+
+            // 3. Add application to Neo4j
+
             String formattedQuery = "MATCH (o:Opportunity {_id: %s}), (u:%s {_id: %s}) " + "CREATE (u)-[:APPLIED_FOR]->(o)";
             String query = String.format(formattedQuery,
                     "\"" + opportunityId + "\"",
@@ -100,16 +102,32 @@ public class ApplicationDAO {
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
 
-            collection.updateOne(
-                    new Document("_id", opportunityId),
-                    new Document("$pull", new Document("applications", new Document("_id", applicationId)))
-            );
+            Document oldDocument = collection.findOneAndUpdate(
+                    new Document("applications._id", applicationId),
+                    Updates.pull("applications", eq("_id", applicationId)),
+                    new FindOneAndUpdateOptions().returnDocument(ReturnDocument.BEFORE));
 
-            String formattedQuery = "MATCH (m:Musician)-[r:APPLIED_FOR]->(o:Opportunity {_id: $opportunityId}) " +
-                    "WHERE m._id = $musicianId DELETE r";
+            // 2. Add task to queue for update redundancies
+            Document publisher = oldDocument.get("publisher", Document.class);
+            String type = publisher.getString("type");
+            String applicantType = type.equalsIgnoreCase("band") ? "Musician" : "Band";
+            List<Document> applications = oldDocument.getList("applications", Document.class);
+            Document applicationDocument = applications.stream()
+                    .filter(appDoc -> applicationId.equals(appDoc.getString("_id")))
+                    .findFirst()
+                    .orElse(null);
+            if (applicationDocument != null) {
+                applicationDocument.append("applicantType", applicantType);
+                MongoUpdater.getInstance().pushTask(new MongoTask("DELETE_APPLICATION", applicationDocument));
+            } else
+                throw new DAOException("Application not found");
+
+            String formattedQuery = "MATCH (u:%s {_id: %s})-[r:APPLIED_FOR]->(o:Opportunity {_id: %s}) " +
+                    "DELETE r";
             String query = String.format(formattedQuery,
-                    "\"" + opportunityId + "\"",
-                    "\"" + getMusicianIdByApplicationId(opportunityId, applicationId) + "\"");
+                    "\"" + applicantType + "\"",
+                    "\"" + ((Document)applicationDocument.get("applicant")).getString("_id") + "\"",
+                    "\"" + opportunityId + "\"");
 
             try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
                 session.executeWrite(tx -> {
@@ -117,10 +135,11 @@ public class ApplicationDAO {
                     return null;
                 });
             } catch (TransactionTerminatedException e) {
-                System.out.println("Transaction terminated. Adding task to queue...");
+                LogManager.getLogger("ApplicationDAO").warn("Transaction terminated. Adding task to queue...");
                 Neo4jConsistencyManager.getInstance().pushOperation(query);
             }
         } catch (Exception ex) {
+            LogManager.getLogger("ApplicationDAO").error(ex.getMessage());
             throw new DAOException(ex);
         }
     }

@@ -32,8 +32,8 @@ public class ApplicationController {
 
     @PostMapping("/")
     public Response createApplication(
-            @RequestParam String opportunityId,
-            @RequestBody Application application
+            @RequestBody Application application,
+            @RequestParam String opportunityId
     ) {
         try {
             Application createdApplication = applicationService.createApplication(opportunityId, application);
@@ -43,10 +43,10 @@ public class ApplicationController {
         }
     }
 
-    @DeleteMapping("/{opportunityId}/{applicationId}")
+    @DeleteMapping("/{applicationId}")
     public Response deleteApplication(
-            @PathVariable String opportunityId,
-            @PathVariable String applicationId
+            @PathVariable String applicationId,
+            @RequestParam String opportunityId
     ) {
         try {
             applicationService.deleteApplication(opportunityId, applicationId);
