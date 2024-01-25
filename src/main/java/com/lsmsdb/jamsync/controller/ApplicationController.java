@@ -30,9 +30,9 @@ public class ApplicationController {
         }
     }
 
-    @PostMapping("/{opportunityId}")
+    @PostMapping("/")
     public Response createApplication(
-            @PathVariable String opportunityId,
+            @RequestParam String opportunityId,
             @RequestBody Application application
     ) {
         try {

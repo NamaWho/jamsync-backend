@@ -6,9 +6,15 @@ import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
+import com.lsmsdb.jamsync.routine.MongoTask;
+import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.Updates;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
@@ -52,18 +58,25 @@ public class ApplicationDAO {
 
     public Application createApplication(String opportunityId, Application application) throws DAOException {
         try {
+            // 1. Add application to opportunity
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
-
             Document applicationDocument = application.toDocument();
-
-            collection.updateOne(
+            Document updatedDocument = collection.findOneAndUpdate(
                     new Document("_id", opportunityId),
-                    new Document("$push", new Document("applications", applicationDocument))
-            );
+                    Updates.push("applications", applicationDocument),
+                    new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
 
-            String formattedQuery = "MATCH (o:Opportunity {_id: $opportunityId}), (m:Musician {_id: $musicianId}) " + "CREATE (m)-[:APPLIED_FOR]->(o)";
+            // 2. Add task to queue for update redundancies
+            MongoUpdater.getInstance().pushTask(new MongoTask("CREATE_APPLICATION", applicationDocument));
+
+            // 3. Add application to Neo4j
+            Document publisher = updatedDocument.get("publisher", Document.class);
+            String type = publisher.getString("type");
+            String applicantType = type.equalsIgnoreCase("band") ? "Musician" : "Band";
+            String formattedQuery = "MATCH (o:Opportunity {_id: %s}), (u:%s {_id: %s}) " + "CREATE (u)-[:APPLIED_FOR]->(o)";
             String query = String.format(formattedQuery,
                     "\"" + opportunityId + "\"",
+                    "\"" + applicantType + "\"",
                     "\"" + application.getApplicant().getString("_id") + "\"");
 
             try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
@@ -72,12 +85,13 @@ public class ApplicationDAO {
                     return null;
                 });
             } catch (TransactionTerminatedException e) {
-                System.out.println("Transaction terminated. Adding task to queue...");
+                LogManager.getLogger("ApplicationDAO").warn("Transaction terminated. Adding task to queue...");
                 Neo4jConsistencyManager.getInstance().pushOperation(query);
             }
 
             return new Application(applicationDocument);
         } catch (Exception ex) {
+            LogManager.getLogger("ApplicationDAO").error(ex.getMessage());
             throw new DAOException(ex);
         }
     }
