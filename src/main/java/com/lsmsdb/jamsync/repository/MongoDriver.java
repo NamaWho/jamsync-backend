@@ -28,6 +28,8 @@ public class MongoDriver {
         return defaultDB.getCollection(c.getName());
     }
 
+
+
     public static MongoDriver getInstance(){return driver;}
 
     public void closeConnection(){
