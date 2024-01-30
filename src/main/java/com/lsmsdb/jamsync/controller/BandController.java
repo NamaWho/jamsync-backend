@@ -7,6 +7,7 @@ import com.lsmsdb.jamsync.service.BandService;
 import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.BandServiceFactory;
+import com.lsmsdb.jamsync.service.factory.MusicianServiceFactory;
 import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
 import com.lsmsdb.jamsync.service.MusicianService;
 import org.apache.logging.log4j.LogManager;
@@ -24,6 +25,8 @@ public class BandController {
     public BandController(){
         this.bandService = BandServiceFactory.create().getService();
         this.registeredUserService = RegisteredUserServiceFactory.create().getService();
+        this.musicianService = MusicianServiceFactory.create().getService();
+
     }
 
     @PostMapping("/")
