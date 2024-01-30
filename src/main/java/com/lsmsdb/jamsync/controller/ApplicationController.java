@@ -55,4 +55,16 @@ public class ApplicationController {
             return new Response(true, ex.getMessage(), null);
         }
     }
+
+    @PostMapping("/{applicationId}/accept")
+    public Response acceptApplication(
+            @PathVariable String applicationId
+    ) {
+        try {
+            applicationService.acceptApplication(applicationId);
+            return new Response(false, "Application accepted successfully", null);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
 }

@@ -145,31 +145,17 @@ public class ApplicationDAO {
         }
     }
 
-    private String getMusicianIdByApplicationId(String opportunityId, String applicationId) {
+    public void acceptApplication(String applicationId) throws DAOException {
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
 
-            MongoCursor<Document> cursor = collection.find(
-                    new Document("_id", opportunityId)
-                            .append("applications._id", applicationId)
-            ).iterator();
+            collection.updateOne(
+                    new Document("applications._id", applicationId),
+                    Updates.set("applications.$.status", true));
 
-            if (cursor.hasNext()) {
-                Document opportunityDocument = cursor.next();
-                List<Document> applications = opportunityDocument.getList("applications", Document.class);
-
-                for (Document appDoc : applications) {
-                    if (applicationId.equals(appDoc.getString("_id"))) {
-                        Document applicant = appDoc.get("applicant", Document.class);
-                        if (applicant != null) {
-                            return applicant.getString("_id");
-                        }
-                    }
-                }
-            }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LogManager.getLogger("ApplicationDAO").error(ex.getMessage());
+            throw new DAOException(ex);
         }
-        return null;
     }
 }
