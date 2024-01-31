@@ -43,4 +43,18 @@ public class AuthController {
             return new Response(true, e.getMessage(), null);
         }
     }
+
+    @PostMapping("/{id}/ban")
+    public Response banUser(@PathVariable String id, @RequestParam String type) {
+        if (type == null || type.isEmpty() || (!type.equals("musician") && !type.equals("band"))) {
+            return new Response(true, "Invalid type field", null);
+        }
+
+        try {
+            authService.banUser(id, type);
+            return new Response(false, "User banned", null);
+        } catch (Exception e) {
+            return new Response(true, e.getMessage(), null);
+        }
+    }
 }

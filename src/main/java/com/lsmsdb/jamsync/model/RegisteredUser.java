@@ -1,5 +1,6 @@
 package com.lsmsdb.jamsync.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public abstract class RegisteredUser {
     protected List<String> genres;
     protected Credentials credentials;
     protected Location location;
+    @JsonProperty("isBanned")
     protected boolean isBanned;
     protected LocalDate creationDateTime;
     protected LocalDate lastUpdateDateTime;

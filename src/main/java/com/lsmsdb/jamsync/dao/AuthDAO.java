@@ -60,4 +60,12 @@ public class AuthDAO {
         }
         return false;
     }
+
+    public void banUser(String id, String type) throws DAOException {
+        try {
+            MongoDriver.getInstance().getCollection(MongoCollectionsEnum.valueOf(type.toUpperCase())).updateOne(eq("_id", id), new Document("$set", new Document("isBanned", true)));
+        } catch (Exception ex) {
+            throw new DAOException(ex);
+        }
+    }
 }
