@@ -102,9 +102,9 @@ public class BandController {
                 return new Response(true, "Musician not found", null);
             }
 
-            bandService.addMember(band.get_id(), musician.get_id());
+            boolean result = bandService.addMember(band.get_id(), musician.get_id());
 
-            return new Response(false, "", null);
+            return new Response(false, "", result);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }

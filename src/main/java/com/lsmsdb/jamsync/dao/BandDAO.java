@@ -181,13 +181,18 @@ public class BandDAO {
     }
     public boolean addMember(String bandId, String musicianId) throws DAOException {
         String query = null;
+        String formattedQuery = "MATCH (b:Band {_id: %s}), (m:Musician {_id: %s})" +
+                "CREATE (m)-[:MEMBER_OF]->(b)";
+         query = String.format(formattedQuery,
+                "\"" + bandId + "\"",
+                "\"" + musicianId + "\"");
+
+
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
-            query = "MATCH (b:Band {_id: $bandId}), (m:Musician {_id: $musicianId})" +
-                    "CREATE (b)-[:MEMBER_OF]->(m)";
 
             String finalQuery = query;
             session.executeWrite(tx -> {
-                tx.run(finalQuery, Values.parameters("bandId", bandId, "musicianId", musicianId));
+                tx.run(finalQuery);
                 return null;
             });
 
