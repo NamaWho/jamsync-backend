@@ -37,7 +37,7 @@ public class MongoUpdater {
     private MongoUpdater() {
         LogManager.getLogger("MongoUpdater").info("MongoUpdater constructor called...");
         // Schedule the updater to run every 2 minutes
-        scheduler.scheduleAtFixedRate(this::updateMongoData, 0, 10, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::updateMongoData, 0, 20, TimeUnit.SECONDS);
     }
 
     public static MongoUpdater getInstance() { return updater; }
@@ -118,7 +118,7 @@ public class MongoUpdater {
                 Document applicationEntry = new Document();
                 applicationEntry.put("_id", application.getString("_id"));
                 applicationEntry.put("createdAt", application.getString("createdAt"));
-                applicationEntry.put("title", application.getString("title"));
+                applicationEntry.put("title", application.getString("opportunityTitle"));
                 applications.add(applicationEntry);
                 // update the applications array
                 document.put("applications", applications);

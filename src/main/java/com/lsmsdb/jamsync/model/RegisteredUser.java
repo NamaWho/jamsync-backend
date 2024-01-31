@@ -1,5 +1,6 @@
 package com.lsmsdb.jamsync.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import org.bson.Document;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -22,12 +24,13 @@ public abstract class RegisteredUser {
     protected List<String> genres;
     protected Credentials credentials;
     protected Location location;
+    @JsonProperty("isBanned")
     protected boolean isBanned;
     protected LocalDate creationDateTime;
     protected LocalDate lastUpdateDateTime;
     protected LocalDate lastLoginDateTime;
-    protected List<Opportunity> opportunities;
-    protected List<Application> applications;
+    protected List<Document> opportunities;
+    protected List<Document> applications;
     
     public RegisteredUser(Document d) {
         this._id = d.getString("_id");
@@ -38,8 +41,8 @@ public abstract class RegisteredUser {
         this.about = d.getString("about");
         this.genres = (List<String>) d.get("genres");
         this.isBanned = d.getBoolean("isBanned");
-        this.opportunities = (List<Opportunity>) d.get("opportunities");
-        this.applications = (List<Application>) d.get("applications");
+        this.opportunities = (List<Document>) d.get("opportunities");
+        this.applications = (List<Document>) d.get("applications");
 
         String creationDateTimeString = d.getString("creationDateTime");
         if(creationDateTimeString.length() > 10) {

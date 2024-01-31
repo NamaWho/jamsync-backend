@@ -1,6 +1,7 @@
 package com.lsmsdb.jamsync.dao;
 
 import com.lsmsdb.jamsync.dao.exception.DAOException;
+import com.lsmsdb.jamsync.model.Credentials;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
@@ -10,6 +11,8 @@ import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.ReturnDocument;
 import lombok.extern.java.Log;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
@@ -95,9 +98,9 @@ public class MusicianDAO {
                 throw new DAOException("Musician not found");
             }
 
+            musician.setCredentials(new Credentials(oldDocument.get("credentials", Document.class)));
             newDocument = musician.toDocument();
-            newDocument.put("credentials", oldDocument.get("credentials"));
-            updatedDocument = collection.findOneAndReplace(eq("_id", id), newDocument);
+            updatedDocument = collection.findOneAndReplace(eq("_id", id), newDocument, new FindOneAndReplaceOptions().returnDocument(ReturnDocument.AFTER));
             if (updatedDocument == null) {
                 LogManager.getLogger("MusicianDAO").warn("Musician not found with id " + id + " in MongoDB");
                 throw new DAOException("Musician not found");

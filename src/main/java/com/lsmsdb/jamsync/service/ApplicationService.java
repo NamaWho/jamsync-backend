@@ -11,5 +11,7 @@ public interface ApplicationService {
     Application createApplication(String opportunityId, Application application) throws BusinessException;
 
     void deleteApplication(String opportunityId, String applicationId) throws BusinessException;
+
+    void acceptApplication(String applicationId) throws BusinessException;
 }
 

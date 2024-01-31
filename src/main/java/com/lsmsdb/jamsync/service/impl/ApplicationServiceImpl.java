@@ -11,15 +11,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final static ApplicationDAO applicationDAO = new ApplicationDAO();
 
     @Override
-    public Opportunity getApplicationById(String applicationId) throws BusinessException {
-        try {
-            return applicationDAO.getApplicationById(applicationId);
-        } catch (Exception ex) {
-            throw new BusinessException(ex);
-        }
-    }
-
-    @Override
     public Application createApplication(String opportunityId, Application application) throws BusinessException {
         try {
             return applicationDAO.createApplication(opportunityId, application);
@@ -29,9 +20,27 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public Opportunity getApplicationById(String applicationId) throws BusinessException {
+        try {
+            return applicationDAO.getApplicationById(applicationId);
+        } catch (Exception ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
     public void deleteApplication(String opportunityId, String applicationId) throws BusinessException {
         try {
             applicationDAO.deleteApplication(opportunityId, applicationId);
+        } catch (Exception ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
+    public void acceptApplication(String applicationId) throws BusinessException {
+        try {
+            applicationDAO.acceptApplication(applicationId);
         } catch (Exception ex) {
             throw new BusinessException(ex);
         }

@@ -31,4 +31,13 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ex);
         }
     }
+
+    @Override
+    public void banUser(String id, String type) throws BusinessException {
+        try {
+            authDAO.banUser(id, type);
+        } catch (Exception ex) {
+            throw new BusinessException(ex);
+        }
+    }
 }

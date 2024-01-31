@@ -48,6 +48,7 @@ public class MusicianController {
 
     @PutMapping("/{id}")
     public Response updateMusicianById(@PathVariable String id, @RequestBody Musician musician) {
+        LogManager.getLogger("MusicianController").info("Updating musician with id " + id);
         try {
             Musician m = musicianService.updateMusicianById(id, musician);
             return new Response(false,"", m);
