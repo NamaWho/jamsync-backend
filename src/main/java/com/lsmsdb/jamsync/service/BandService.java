@@ -11,4 +11,6 @@ public interface BandService {
 
     boolean addMember(String id, String memberId) throws BusinessException;
 
+    boolean removeMember(String id, String memberId) throws BusinessException;
+
 }

@@ -53,4 +53,13 @@ public class BandServiceImpl implements BandService {
             throw new BusinessException(ex);
         }
     }
+
+    @Override
+    public boolean removeMember(String bandId, String memberId) throws BusinessException{
+        try{
+            return bandDAO.removeMember(bandId,memberId);
+        }catch (DAOException ex){
+            throw new BusinessException(ex);
+        }
+    }
 }

@@ -109,4 +109,28 @@ public class BandController {
             return new Response(true, ex.getMessage(), null);
         }
     }
+    @PostMapping("/{id}/member")
+    public Response removeMember(@PathVariable String id, @RequestParam String memberId) {
+        try {
+            if (id == null || memberId == null || id.isEmpty() || memberId.isEmpty()) {
+                return new Response(true, "Band ID and Musician ID are required", null);
+            }
+
+            Band band = bandService.getBandById(id);
+            if (band == null) {
+                return new Response(true, "Band not found", null);
+            }
+
+            Musician musician = musicianService.getMusicianById(memberId);
+            if (musician == null) {
+                return new Response(true, "Musician not found", null);
+            }
+
+            boolean result = bandService.removeMember(band.get_id(), musician.get_id());
+
+            return new Response(false, "", result);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
 }
