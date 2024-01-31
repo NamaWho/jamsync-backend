@@ -22,7 +22,7 @@ public class BandController {
     private MusicianService musicianService;
     private RegisteredUserService registeredUserService;
 
-    public BandController(){
+    public BandController() {
         this.bandService = BandServiceFactory.create().getService();
         this.registeredUserService = RegisteredUserServiceFactory.create().getService();
         this.musicianService = MusicianServiceFactory.create().getService();
@@ -37,7 +37,7 @@ public class BandController {
 
         try {
             bandService.createBand(band);
-            return new Response(false,"", null);
+            return new Response(false, "", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -57,7 +57,7 @@ public class BandController {
     public Response updateBandById(@PathVariable String id, @RequestBody Band band) {
         try {
             Band b = bandService.updateBandById(id, band);
-            return new Response(false,"", b);
+            return new Response(false, "", b);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -68,7 +68,7 @@ public class BandController {
         LogManager.getLogger(BandController.class).info("Deleting band with id: " + id);
         try {
             bandService.deleteBandById(id);
-            return new Response(false,"", null);
+            return new Response(false, "", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -78,11 +78,12 @@ public class BandController {
     public Response getFollowersCount(@PathVariable String id) {
         try {
             Integer followersCount = registeredUserService.getFollowersCount(id, "Band");
-            return new Response(false,"", followersCount);
+            return new Response(false, "", followersCount);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
     }
+
     @PostMapping("/{id}/member")
     public Response addMember(@PathVariable String id, @RequestParam String memberId) {
         try {
@@ -90,15 +91,17 @@ public class BandController {
                 return new Response(true, "Band ID and Musician ID are required", null);
             }
 
-            String band = String.valueOf(bandService.getBandById(id));
+            Band band = bandService.getBandById(id);
             if (band == null) {
                 return new Response(true, "Band not found", null);
             }
+
             Musician musician = musicianService.getMusicianById(memberId);
             if (musician == null) {
                 return new Response(true, "Musician not found", null);
             }
-            bandService.addMember(band, String.valueOf(musician));
+
+            bandService.addMember(band.get_id(), musician.get_id());
 
             return new Response(false, "", null);
         } catch (BusinessException ex) {

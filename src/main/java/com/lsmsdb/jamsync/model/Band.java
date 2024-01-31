@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class Band extends RegisteredUser{
-    private double yearsTogether;
+    private Double yearsTogether;
     // membersNumber
     // membersAvgAge
     private Integer gigsPlayed;
