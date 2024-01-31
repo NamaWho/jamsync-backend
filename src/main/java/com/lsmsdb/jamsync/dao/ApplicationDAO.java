@@ -151,7 +151,7 @@ public class ApplicationDAO {
 
             collection.updateOne(
                     new Document("applications._id", applicationId),
-                    Updates.set("applications.$.status", true));
+                    Updates.set("applications.$.status", 1));
 
         } catch (Exception ex) {
             LogManager.getLogger("ApplicationDAO").error(ex.getMessage());
