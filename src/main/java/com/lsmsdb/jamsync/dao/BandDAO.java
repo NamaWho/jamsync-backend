@@ -181,13 +181,18 @@ public class BandDAO {
     }
     public boolean addMember(String bandId, String musicianId) throws DAOException {
         String query = null;
+        String formattedQuery = "MATCH (b:Band {_id: %s}), (m:Musician {_id: %s})" +
+                "CREATE (m)-[:MEMBER_OF]->(b)";
+         query = String.format(formattedQuery,
+                "\"" + bandId + "\"",
+                "\"" + musicianId + "\"");
+
+
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
-            query = "MATCH (b:Band {_id: $bandId}), (m:Musician {_id: $musicianId})" +
-                    "CREATE (b)-[:MEMBER_OF]->(m)";
 
             String finalQuery = query;
             session.executeWrite(tx -> {
-                tx.run(finalQuery, Values.parameters("bandId", bandId, "musicianId", musicianId));
+                tx.run(finalQuery);
                 return null;
             });
 
@@ -202,5 +207,28 @@ public class BandDAO {
             throw new DAOException(e.getMessage());
         }
     }
+    public boolean removeMember(String bandId, String musicianId) throws DAOException {
+        String query = null;
+        String formattedQuery = "MATCH (b:Band {_id: '%s'})<-[r:MEMBER_OF]-(m:Musician {_id: '%s'})" +
+                "DELETE r";
+        query = String.format(formattedQuery, bandId, musicianId);
 
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            String finalQuery = query;
+            session.executeWrite(tx -> {
+                tx.run(finalQuery);
+                return null;
+            });
+
+            return true;
+        } catch (TransactionTerminatedException e) {
+            // Add this task to a queue to be executed later from the Neo4jConsistencyManager
+            LogManager.getLogger(BandDAO.class).error("Transaction terminated. Adding task to queue...");
+            Neo4jConsistencyManager.getInstance().pushOperation(query);
+            return false;
+        } catch (Exception e) {
+            LogManager.getLogger(BandDAO.class).error("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+    }
 }

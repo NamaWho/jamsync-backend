@@ -7,6 +7,7 @@ import com.lsmsdb.jamsync.service.BandService;
 import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.BandServiceFactory;
+import com.lsmsdb.jamsync.service.factory.MusicianServiceFactory;
 import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
 import com.lsmsdb.jamsync.service.MusicianService;
 import org.apache.logging.log4j.LogManager;
@@ -21,9 +22,11 @@ public class BandController {
     private MusicianService musicianService;
     private RegisteredUserService registeredUserService;
 
-    public BandController(){
+    public BandController() {
         this.bandService = BandServiceFactory.create().getService();
         this.registeredUserService = RegisteredUserServiceFactory.create().getService();
+        this.musicianService = MusicianServiceFactory.create().getService();
+
     }
 
     @PostMapping("/")
@@ -34,7 +37,7 @@ public class BandController {
 
         try {
             bandService.createBand(band);
-            return new Response(false,"", null);
+            return new Response(false, "", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -55,7 +58,7 @@ public class BandController {
         LogManager.getLogger(BandController.class).info("Updating band with id " + id);
         try {
             Band b = bandService.updateBandById(id, band);
-            return new Response(false,"", b);
+            return new Response(false, "", b);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -66,7 +69,7 @@ public class BandController {
         LogManager.getLogger(BandController.class).info("Deleting band with id: " + id);
         try {
             bandService.deleteBandById(id);
-            return new Response(false,"", null);
+            return new Response(false, "", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -76,11 +79,12 @@ public class BandController {
     public Response getFollowersCount(@PathVariable String id) {
         try {
             Integer followersCount = registeredUserService.getFollowersCount(id, "Band");
-            return new Response(false,"", followersCount);
+            return new Response(false, "", followersCount);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
     }
+
     @PostMapping("/{id}/member")
     public Response addMember(@PathVariable String id, @RequestParam String memberId) {
         try {
@@ -88,17 +92,43 @@ public class BandController {
                 return new Response(true, "Band ID and Musician ID are required", null);
             }
 
-            String band = String.valueOf(bandService.getBandById(id));
+            Band band = bandService.getBandById(id);
             if (band == null) {
                 return new Response(true, "Band not found", null);
             }
+
             Musician musician = musicianService.getMusicianById(memberId);
             if (musician == null) {
                 return new Response(true, "Musician not found", null);
             }
-            bandService.addMember(band, String.valueOf(musician));
 
-            return new Response(false, "", null);
+            boolean result = bandService.addMember(band.get_id(), musician.get_id());
+
+            return new Response(false, "", result);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+    @DeleteMapping("/{id}/member")
+    public Response removeMember(@PathVariable String id, @RequestParam String memberId) {
+        try {
+            if (id == null || memberId == null || id.isEmpty() || memberId.isEmpty()) {
+                return new Response(true, "Band ID and Musician ID are required", null);
+            }
+
+            Band band = bandService.getBandById(id);
+            if (band == null) {
+                return new Response(true, "Band not found", null);
+            }
+
+            Musician musician = musicianService.getMusicianById(memberId);
+            if (musician == null) {
+                return new Response(true, "Musician not found", null);
+            }
+
+            boolean result = bandService.removeMember(band.get_id(), musician.get_id());
+
+            return new Response(false, "", result);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
