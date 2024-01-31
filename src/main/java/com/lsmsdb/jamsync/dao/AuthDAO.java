@@ -3,15 +3,22 @@ package com.lsmsdb.jamsync.dao;
 import com.lsmsdb.jamsync.dao.exception.DAOException;
 import com.lsmsdb.jamsync.dao.utils.HashUtil;
 import com.lsmsdb.jamsync.model.Credentials;
+import com.lsmsdb.jamsync.model.Location;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.model.RegisteredUser;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Position;
 import org.bson.Document;
 
 import com.lsmsdb.jamsync.repository.MongoDriver;
+import org.bson.conversions.Bson;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static com.mongodb.client.model.Filters.eq;

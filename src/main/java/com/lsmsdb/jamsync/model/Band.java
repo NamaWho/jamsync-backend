@@ -21,7 +21,12 @@ public class Band extends RegisteredUser{
     public Band(Document d){
         super(d);
         this.yearsTogether = d.getDouble("yearsTogether");
-        this.gigsPlayed = d.getInteger("gigsPlayed");
+        if (d.get("gigsPlayed") instanceof String) {
+            this.gigsPlayed = Integer.parseInt(d.getString("gigsPlayed"));
+        }
+        else {
+            this.gigsPlayed = d.getInteger("gigsPlayed");
+        }
     }
 
     public Document toDocument() {
