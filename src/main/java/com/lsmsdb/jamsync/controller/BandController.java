@@ -109,7 +109,7 @@ public class BandController {
             return new Response(true, ex.getMessage(), null);
         }
     }
-    @PostMapping("/{id}/member")
+    @DeleteMapping("/{id}/member")
     public Response removeMember(@PathVariable String id, @RequestParam String memberId) {
         try {
             if (id == null || memberId == null || id.isEmpty() || memberId.isEmpty()) {
