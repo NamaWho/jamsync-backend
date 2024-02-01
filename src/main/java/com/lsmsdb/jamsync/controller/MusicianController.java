@@ -113,4 +113,13 @@ public class MusicianController {
             return new Response(true, ex.getMessage(), null);
         }
     }
+
+    @GetMapping("/suggestedOpportunities")
+    public Response getSuggestedOpportunities(@RequestParam Musician m) {
+        try {
+            return new Response(false,"", musicianService.getSuggestedOpportunities(m));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
 }

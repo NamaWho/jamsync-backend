@@ -2,7 +2,10 @@ package com.lsmsdb.jamsync.service;
 
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.model.Musician;
+import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.factory.BandServiceFactory;
+
+import java.util.List;
 
 public interface MusicianService {
 
@@ -21,4 +24,5 @@ public interface MusicianService {
 
     void unfollow(String id, String followedId, String type) throws BusinessException;
 
+    List<Opportunity> getSuggestedOpportunities(Musician m) throws BusinessException;
 }

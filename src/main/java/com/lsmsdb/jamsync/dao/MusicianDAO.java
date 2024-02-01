@@ -3,6 +3,7 @@ package com.lsmsdb.jamsync.dao;
 import com.lsmsdb.jamsync.dao.exception.DAOException;
 import com.lsmsdb.jamsync.model.Credentials;
 import com.lsmsdb.jamsync.model.Musician;
+import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
@@ -22,6 +23,8 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
+
+import java.util.List;
 
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
 import static com.mongodb.client.model.Filters.eq;
@@ -239,5 +242,8 @@ public class MusicianDAO {
         }
     }
 
-
+    public List<Opportunity> getSuggestedOpportunities(Musician m) throws DAOException {
+        // TODO: implement this
+        return null;
+    }
 }

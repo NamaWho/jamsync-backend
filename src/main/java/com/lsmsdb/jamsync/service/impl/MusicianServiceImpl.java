@@ -1,10 +1,13 @@
 package com.lsmsdb.jamsync.service.impl;
 
 import com.lsmsdb.jamsync.dao.MusicianDAO;
+import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.MusicianService;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.dao.exception.DAOException;
+
+import java.util.List;
 
 public class MusicianServiceImpl implements MusicianService {
     private final static MusicianDAO musicianDAO = new MusicianDAO();
@@ -67,6 +70,15 @@ public class MusicianServiceImpl implements MusicianService {
     public void unfollow(String id, String followedId, String type) throws BusinessException {
         try {
             musicianDAO.unfollow(id, followedId, type);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
+    public List<Opportunity> getSuggestedOpportunities(Musician m) throws BusinessException {
+        try {
+            return musicianDAO.getSuggestedOpportunities(m);
         } catch (DAOException ex) {
             throw new BusinessException(ex);
         }
