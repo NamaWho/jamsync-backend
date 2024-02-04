@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.springframework.web.bind.annotation.*;
 import com.lsmsdb.jamsync.service.MusicianService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
+
 @RestController
 @RequestMapping("/api/musicians")
 public class MusicianController {
