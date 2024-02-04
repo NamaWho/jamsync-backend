@@ -22,6 +22,7 @@ import org.neo4j.driver.types.Node;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RegisteredUserDAO {
 
@@ -54,8 +55,8 @@ public class RegisteredUserDAO {
                                            Integer page,
                                            Integer pageSize) throws DAOException {
         MongoCollectionsEnum collectionType = switch (type) {
-            case "musician" -> MongoCollectionsEnum.MUSICIAN;
-            case "band" -> MongoCollectionsEnum.BAND;
+            case "Musician" -> MongoCollectionsEnum.MUSICIAN;
+            case "Band" -> MongoCollectionsEnum.BAND;
             default -> throw new IllegalArgumentException("Invalid type");
         };
 
@@ -63,26 +64,25 @@ public class RegisteredUserDAO {
         List<Bson> filters = new ArrayList<>();
 
         // Add filters based on the provided parameters
-        if (username != null) {
+        if (username != null && !username.isEmpty()) {
             filters.add(Filters.eq("username", username));
         }
         if (genres != null && !genres.isEmpty()) {
             filters.add(Filters.in("genres", genres));
         }
-        if (type.equals("musician") && instruments != null && !instruments.isEmpty()) {
+        if (type.equals("Musician") && instruments != null && !instruments.isEmpty()) {
             filters.add(Filters.in("instruments", instruments));
         }
-        if (location != null) {
-            LogManager.getLogger().info(location.toDocument());
+        if (location != null && !location.getCity().isEmpty()) {
             filters.add(Filters.near("location.geojson", new Point(new Position(location.getGeojson().getCoordinates().get(0), location.getGeojson().getCoordinates().get(1))), maxDistance.doubleValue()*1000, null));
         }
-        if (type.equals("musician") && minAge != null) {
+        if (type.equals("Musician") && minAge != null) {
             filters.add(Filters.gte("age", minAge));
         }
-        if (type.equals("musician") && maxAge != null) {
+        if (type.equals("Musician") && maxAge != null) {
             filters.add(Filters.lte("age", maxAge));
         }
-        if (type.equals("musician") && gender != null) {
+        if (type.equals("Musician") && gender != null && !gender.equals("-")) {
             filters.add(Filters.eq("gender", gender));
         }
 
@@ -90,14 +90,15 @@ public class RegisteredUserDAO {
         Bson filter = filters.isEmpty() ? new Document() : Filters.and(filters);
         // Calculate the number of documents to skip
         int skip = (page - 1) * pageSize;
+        LogManager.getLogger().info("Filter: " + filter);
         // Execute the query
         try (MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(collectionType).find(filter).skip(skip).limit(pageSize).iterator()) {
             List<RegisteredUser> users = new ArrayList<>();
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
                 users.add(switch (type) {
-                    case "musician" -> new Musician(doc);
-                    case "band" -> new Band(doc);
+                    case "Musician" -> new Musician(doc);
+                    case "Band" -> new Band(doc);
                     default -> throw new IllegalArgumentException("Invalid type");
                 });
             }
