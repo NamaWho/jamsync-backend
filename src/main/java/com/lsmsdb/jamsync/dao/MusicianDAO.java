@@ -2,6 +2,7 @@ package com.lsmsdb.jamsync.dao;
 
 import com.lsmsdb.jamsync.dao.exception.DAOException;
 import com.lsmsdb.jamsync.model.Credentials;
+import com.lsmsdb.jamsync.model.Location;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.repository.MongoDriver;
@@ -10,13 +11,13 @@ import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
 import com.lsmsdb.jamsync.routine.MongoTask;
 import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
+import com.mongodb.client.*;
 import com.mongodb.client.model.FindOneAndReplaceOptions;
 import com.mongodb.client.model.ReturnDocument;
 import lombok.extern.java.Log;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
@@ -24,10 +25,12 @@ import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
 
-import java.util.List;
+
+import java.util.*;
 
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
-import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.*;
+
 
 public class MusicianDAO {
 
@@ -243,7 +246,35 @@ public class MusicianDAO {
     }
 
     public List<Opportunity> getSuggestedOpportunities(Musician m) throws DAOException {
-        // TODO: implement this
-        return null;
+        List<Opportunity> suggestedOpportunities = new ArrayList<>();
+        List<String> musicianGenres = m.getGenres();
+        List<String> musicianInstruments = m.getInstruments();
+        Location musicianLocation = m.getLocation();
+
+        // Calculate the date 60 days ago
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_MONTH, -60);
+        Date sixtyDaysAgo = cal.getTime();
+
+        // MongoDB query to filter opportunities
+        Document query = new Document();
+        query.append("createdAt", new Document("$gt", sixtyDaysAgo));
+        query.append("expired_at", new Document("$gt", new Date()));
+        query.append("country", musicianLocation.getCountry());
+        query.append("city", musicianLocation.getCity());
+
+        // Execute the query and retrieve the suggested opportunities
+        // Replace 'opportunities' with the name of your MongoDB collection
+        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+        MongoCursor<Document> cursor = collection.find(query).iterator();
+        while (cursor.hasNext()) {
+            Document opportunityDoc = cursor.next();
+            // Convert the Document to Opportunity object and add it to the list
+            Opportunity opportunity = new Opportunity(opportunityDoc);
+            suggestedOpportunities.add(opportunity);
+        }
+        cursor.close();
+
+        return suggestedOpportunities;
     }
 }
