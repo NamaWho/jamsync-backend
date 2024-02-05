@@ -90,7 +90,6 @@ public class RegisteredUserDAO {
         Bson filter = filters.isEmpty() ? new Document() : Filters.and(filters);
         // Calculate the number of documents to skip
         int skip = (page - 1) * pageSize;
-        LogManager.getLogger().info("Filter: " + filter);
         // Execute the query
         try (MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(collectionType).find(filter).skip(skip).limit(pageSize).iterator()) {
             List<RegisteredUser> users = new ArrayList<>();
