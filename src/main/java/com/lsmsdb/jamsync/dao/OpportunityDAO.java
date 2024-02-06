@@ -1,7 +1,7 @@
 package com.lsmsdb.jamsync.dao;
 
 import com.lsmsdb.jamsync.dao.exception.DAOException;
-import com.lsmsdb.jamsync.model.Opportunity;
+import com.lsmsdb.jamsync.model.*;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
@@ -9,12 +9,20 @@ import com.lsmsdb.jamsync.routine.MongoTask;
 import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Position;
+import lombok.extern.java.Log;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
 
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -127,6 +135,60 @@ public class OpportunityDAO {
         } catch (Exception e) {
             LogManager.getLogger("OpportunityDAO").error(e.getMessage());
             throw new DAOException(e.getMessage());
+        }
+    }
+
+    public List<Opportunity> searchOpportunities(String forUser, String publisherUsername, List<String> genres, List<String> instruments, Location location, Integer maxDistance, Integer minAge, Integer maxAge, String gender, Integer page, Integer pageSize) throws DAOException {
+        // Create a new list of filters
+        List<Bson> filters = new ArrayList<>();
+
+        String byUser = switch (forUser) {
+            case "Musician" -> "Band";
+            case "Band" -> "Musician";
+            default -> throw new IllegalArgumentException("Invalid type");
+        };
+        filters.add(Filters.eq("publisher.type", byUser));
+
+        // Add filters based on the provided parameters
+        if (publisherUsername != null && !publisherUsername.isEmpty()) {
+            filters.add(Filters.eq("publisher.username", publisherUsername));
+        }
+        if (genres != null && !genres.isEmpty()) {
+            filters.add(Filters.in("genres", genres));
+        }
+        if (forUser.equals("Musician") && instruments != null && !instruments.isEmpty()) {
+            filters.add(Filters.in("instruments", instruments));
+        }
+        if (location != null && !location.getCity().isEmpty()) {
+            filters.add(Filters.near("location.geojson", new Point(new Position(location.getGeojson().getCoordinates().get(0), location.getGeojson().getCoordinates().get(1))), maxDistance.doubleValue()*1000, null));
+        }
+        if (forUser.equals("Musician") && minAge != null && minAge > 0) {
+            filters.add(Filters.gte("minimumAge", minAge));
+        }
+        if (forUser.equals("Musician") && maxAge != null && maxAge > 0) {
+            filters.add(Filters.lte("maximumAge", maxAge));
+        }
+        if (forUser.equals("Musician") && gender != null && !gender.equals("-")) {
+            filters.add(Filters.eq("gender", gender));
+        }
+
+        // Combine all filters. If there are no filters create an empty filter
+        Bson filter = filters.isEmpty() ? new Document() : Filters.and(filters);
+        // Calculate the number of documents to skip
+        int skip = (page - 1) * pageSize;
+        LogManager.getLogger("OpportunityDAO").info("Opportunity filter: " + filter);
+        // Execute the query
+        try (MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY).find(filter).skip(skip).limit(pageSize).iterator()) {
+            List<Opportunity> opportunities = new ArrayList<>();
+            while (cursor.hasNext()) {
+                Document doc = cursor.next();
+                LogManager.getLogger("OpportunityDAO").info("Opportunity found: " + doc);
+                opportunities.add(new Opportunity(doc));
+            }
+            LogManager.getLogger("OpportunityDAO").info("Opportunities found: " + opportunities.size());
+            return opportunities;
+        } catch (Exception ex) {
+            throw new DAOException(ex);
         }
     }
 }
