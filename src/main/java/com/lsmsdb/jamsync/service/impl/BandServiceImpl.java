@@ -5,6 +5,9 @@ import com.lsmsdb.jamsync.dao.exception.DAOException;
 import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.service.BandService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
+import org.bson.Document;
+
+import java.util.List;
 
 public class BandServiceImpl implements BandService {
     private final static BandDAO bandDAO = new BandDAO();
@@ -59,6 +62,15 @@ public class BandServiceImpl implements BandService {
         try{
             return bandDAO.removeMember(bandId,memberId);
         }catch (DAOException ex){
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
+    public List<Document> getMembers(String id) throws BusinessException {
+        try {
+            return bandDAO.getMembers(id);
+        } catch (DAOException ex) {
             throw new BusinessException(ex);
         }
     }

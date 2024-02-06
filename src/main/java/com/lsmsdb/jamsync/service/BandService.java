@@ -2,6 +2,9 @@ package com.lsmsdb.jamsync.service;
 
 import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
+import org.bson.Document;
+
+import java.util.List;
 
 public interface BandService {
     void createBand(Band band) throws BusinessException;
@@ -12,5 +15,5 @@ public interface BandService {
     boolean addMember(String id, String memberId) throws BusinessException;
 
     boolean removeMember(String id, String memberId) throws BusinessException;
-
+    List<Document> getMembers(String id) throws BusinessException;
 }
