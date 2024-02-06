@@ -4,6 +4,9 @@ import com.lsmsdb.jamsync.controller.response.Response;
 import com.lsmsdb.jamsync.service.AuthService;
 import com.lsmsdb.jamsync.service.factory.AuthServiceFactory;
 import lombok.Getter;
+import lombok.extern.java.Log;
+import org.apache.logging.log4j.LogManager;
+import org.bson.Document;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,9 +20,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Response login(@RequestParam String type, @RequestParam String user, @RequestParam String password) {
+    public Response login(@RequestBody Document request) {
+        String type = request.getString("type");
+        String user = request.getString("user");
+        String password = request.getString("password");
         try {
             String jwt = authService.login(type, user, password);
+            LogManager.getLogger().info(jwt);
             if (jwt != null) {
                 return new Response(false, "Login successful", jwt);
             } else {
