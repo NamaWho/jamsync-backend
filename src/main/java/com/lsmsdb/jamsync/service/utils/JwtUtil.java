@@ -3,6 +3,7 @@ package com.lsmsdb.jamsync.service.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.bson.Document;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -13,12 +14,19 @@ public class JwtUtil {
     private static final long EXPIRATION_TIME_MILLISECONDS = 3600000; // 1 hour
 
     // Create a JWT
-    public static String generateToken(String subject) {
+    public static String generateToken(String subject, String type, Document user) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + EXPIRATION_TIME_MILLISECONDS);
 
         Map<String, Object> claims = new HashMap<>();
-        // You can add custom claims here
+        claims.put("type", type);
+        claims.put("username", user.getString("username"));
+        claims.put("profilePictureUrl", user.getString("profilePictureUrl"));
+        claims.put("id", user.getString("_id"));
+        if (type.equals("musician")) {
+            claims.put("firstName", user.getString("firstName"));
+            claims.put("lastName", user.getString("lastName"));
+        }
 
         return Jwts.builder()
                 .setClaims(claims)

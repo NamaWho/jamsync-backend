@@ -7,11 +7,14 @@ import com.lsmsdb.jamsync.model.Location;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.model.RegisteredUser;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
+import com.lsmsdb.jamsync.service.utils.JwtUtil;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
+import lombok.extern.java.Log;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 
 import com.lsmsdb.jamsync.repository.MongoDriver;
@@ -25,7 +28,7 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class AuthDAO {
 
-    public boolean login(String type, String user, String password) throws DAOException{
+    public String login(String type, String user, String password) throws DAOException{
         MongoCollectionsEnum collectionType;
         switch (type) {
             case "musician":
@@ -35,7 +38,10 @@ public class AuthDAO {
                 collectionType = MongoCollectionsEnum.BAND;
                 break;
             case "admin":
-                return user.equals("administrator") && password.equals("administrator");
+                if (user.equals("administrator") && password.equals("administrator"))
+                    return JwtUtil.generateToken(user, type, new Document());
+                else
+                    return null;
             default:
                 throw new IllegalArgumentException("Invalid type");
         }
@@ -43,18 +49,18 @@ public class AuthDAO {
         try(MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(collectionType).find(eq("credentials.user", user)).iterator()){
             if(cursor.hasNext()){
                 Document doc = cursor.next();
-
                 String hashedPassword = new Credentials((Document) doc.get("credentials")).getPassword();
                 String hashedInputPassword = HashUtil.hashPassword(password);
 
-                if(hashedPassword.equals(hashedInputPassword)){
-                    return true;
-                }
+                if(hashedPassword.equals(hashedInputPassword))
+                    return JwtUtil.generateToken(user, type, doc);
+                else
+                    return null;
             }
         }catch(Exception ex){
             throw new DAOException(ex);
         }
-        return false;
+        return null;
     }
 
     public boolean checkUsername(String username, String type) throws DAOException{
