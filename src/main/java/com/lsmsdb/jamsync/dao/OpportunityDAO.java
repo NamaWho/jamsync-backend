@@ -162,11 +162,11 @@ public class OpportunityDAO {
         if (location != null && !location.getCity().isEmpty()) {
             filters.add(Filters.near("location.geojson", new Point(new Position(location.getGeojson().getCoordinates().get(0), location.getGeojson().getCoordinates().get(1))), maxDistance.doubleValue()*1000, null));
         }
-        if (forUser.equals("Musician") && minAge != null) {
-            filters.add(Filters.gte("minAge", minAge));
+        if (forUser.equals("Musician") && minAge != null && minAge > 0) {
+            filters.add(Filters.gte("minimumAge", minAge));
         }
-        if (forUser.equals("Musician") && maxAge != null) {
-            filters.add(Filters.lte("maxAge", maxAge));
+        if (forUser.equals("Musician") && maxAge != null && maxAge > 0) {
+            filters.add(Filters.lte("maximumAge", maxAge));
         }
         if (forUser.equals("Musician") && gender != null && !gender.equals("-")) {
             filters.add(Filters.eq("gender", gender));

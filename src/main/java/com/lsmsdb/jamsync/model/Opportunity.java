@@ -85,11 +85,13 @@ public class Opportunity {
         this.instruments = (List<String>) d.get("instruments");
         this.genres = (List<String>) d.get("genres");
         // parseInteger minimum and maximum age
-        this.minimumAge = (d.getString("minimumAge") == null || d.getString("minimumAge").isEmpty()) ? 0 : Integer.parseInt(d.getString("minimumAge"));
-        this.maximumAge = (d.getString("maximumAge") == null || d.getString("minimumAge").isEmpty()) ? 0 : Integer.parseInt(d.getString("maximumAge"));
+        this.minimumAge = d.getInteger("minimumAge") == null ? 0 : d.getInteger("minimumAge");
+        this.maximumAge = d.getInteger("maximumAge") == null ? 0 : d.getInteger("maximumAge");
         //Object genderObj = d.get("gender");
         //this.gender = genderObj == null ? '-' : ((Character) genderObj);
         this.gender = (d.getString("gender") == null || d.getString("gender").isEmpty()) ? '-' : d.getString("gender").charAt(0);
+
+        LogManager.getLogger().info("parsing opportunity");
 
         String creationDateTimeString = d.getString("createdAt");
         if(creationDateTimeString.length() > 10) {

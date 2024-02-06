@@ -76,10 +76,10 @@ public class RegisteredUserDAO {
         if (location != null && !location.getCity().isEmpty()) {
             filters.add(Filters.near("location.geojson", new Point(new Position(location.getGeojson().getCoordinates().get(0), location.getGeojson().getCoordinates().get(1))), maxDistance.doubleValue()*1000, null));
         }
-        if (type.equals("Musician") && minAge != null) {
+        if (type.equals("Musician") && minAge != null && minAge > 0) {
             filters.add(Filters.gte("age", minAge));
         }
-        if (type.equals("Musician") && maxAge != null) {
+        if (type.equals("Musician") && maxAge != null && maxAge > 0) {
             filters.add(Filters.lte("age", maxAge));
         }
         if (type.equals("Musician") && gender != null && !gender.equals("-")) {
