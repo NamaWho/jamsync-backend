@@ -58,6 +58,15 @@ public class MusicianServiceImpl implements MusicianService {
     }
 
     @Override
+    public boolean checkFollow(String id, String userId, String type) throws BusinessException {
+        try {
+            return musicianDAO.checkFollow(id, userId, type);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
     public void follow(String id, String followedId, String type) throws BusinessException {
         try {
             musicianDAO.follow(id, followedId, type);
