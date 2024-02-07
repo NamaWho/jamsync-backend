@@ -272,17 +272,24 @@ public class MusicianDAO {
         String musicianCountry = musicianLocation.getCountry();
         Integer maxDistance = 50;
         LocalDate sixtyDaysAgo = LocalDate.now().minusDays(60);
+        String today = LocalDate.now().toString();
 
         MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
 
-        Bson musicianCountryFilter = Filters.eq("location.state", musicianCountry);
+        Bson musicianExpiresAtFilter = Filters.or(
+                Filters.eq("expiresAt", null),
+                Filters.gte("expiresAt", today)
+        );
+        Bson musicianCountryFilter = Filters.or(
+                Filters.eq("location.state", musicianCountry),
+                Filters.eq("location.country", musicianCountry));
         Bson createdAtFilter = Filters.gte("createdAt", sixtyDaysAgo.toString());
         Bson genresFilter = Filters.in("genres", musicianGenres);
         Bson instrumentsFilter = Filters.in("instruments", musicianInstruments);
         Bson typeFilter = Filters.eq("publisher.type", "Band");
 
         List<Bson> filters = new ArrayList<>();
-        filters.add(Filters.eq("expiresAt", null));
+        filters.add(musicianExpiresAtFilter);
         filters.add(musicianCountryFilter);
         filters.add(createdAtFilter);
         filters.add(genresFilter);

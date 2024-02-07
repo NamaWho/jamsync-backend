@@ -271,8 +271,6 @@ public class BandDAO {
         List<String> bandGenres = b.getGenres();
         Location bandLocation = b.getLocation();
         String bandCountry = bandLocation.getCountry().isEmpty() ? bandLocation.getState() : bandLocation.getCountry();
-        LogManager.getLogger("suggestion").info(bandCountry);
-        System.out.println("HELLOOOO" + bandCountry);
         Integer maxDistance = 50;
         LocalDate sixtyDaysAgo = LocalDate.now().minusDays(60);
         String today = LocalDate.now().toString();
@@ -306,7 +304,6 @@ public class BandDAO {
         }
 
         Bson query = Filters.and(filters);
-        System.out.println(filters);
         MongoCursor<Document> cursor = collection.find(query).iterator();
         while (cursor.hasNext()) {
             Document opportunityDoc = cursor.next();

@@ -1,6 +1,7 @@
 package com.lsmsdb.jamsync.service;
 
 import com.lsmsdb.jamsync.model.Band;
+import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import org.bson.Document;
 
@@ -16,4 +17,5 @@ public interface BandService {
 
     boolean removeMember(String id, String memberId) throws BusinessException;
     List<Document> getMembers(String id) throws BusinessException;
+    List<Opportunity> getSuggestedOpportunities(Band b) throws BusinessException;
 }

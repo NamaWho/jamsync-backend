@@ -3,6 +3,7 @@ package com.lsmsdb.jamsync.service.impl;
 import com.lsmsdb.jamsync.dao.BandDAO;
 import com.lsmsdb.jamsync.dao.exception.DAOException;
 import com.lsmsdb.jamsync.model.Band;
+import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.BandService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import org.bson.Document;
@@ -70,6 +71,15 @@ public class BandServiceImpl implements BandService {
     public List<Document> getMembers(String id) throws BusinessException {
         try {
             return bandDAO.getMembers(id);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
+    public List<Opportunity> getSuggestedOpportunities(Band b) throws BusinessException {
+        try {
+            return bandDAO.getSuggestedOpportunities(b);
         } catch (DAOException ex) {
             throw new BusinessException(ex);
         }

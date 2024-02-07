@@ -130,8 +130,8 @@ public class MusicianController {
         }
     }
 
-    @GetMapping("/suggestedOpportunities")
-    public Response getSuggestedOpportunities(@RequestParam Musician m) {
+    @PostMapping("/suggestedOpportunities")
+    public Response getSuggestedOpportunities(@RequestBody Musician m) {
         try {
             return new Response(false,"", musicianService.getSuggestedOpportunities(m));
         } catch (BusinessException ex) {

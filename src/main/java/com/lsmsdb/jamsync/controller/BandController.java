@@ -145,4 +145,13 @@ public class BandController {
             return new Response(true, ex.getMessage(), null);
         }
     }
+
+    @PostMapping("/suggestedOpportunities")
+    public Response getSuggestedOpportunities(@RequestBody Band b) {
+        try {
+            return new Response(false,"", bandService.getSuggestedOpportunities(b));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
 }
