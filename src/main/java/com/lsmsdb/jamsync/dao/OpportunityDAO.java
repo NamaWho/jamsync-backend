@@ -182,10 +182,8 @@ public class OpportunityDAO {
             List<Opportunity> opportunities = new ArrayList<>();
             while (cursor.hasNext()) {
                 Document doc = cursor.next();
-                LogManager.getLogger("OpportunityDAO").info("Opportunity found: " + doc);
                 opportunities.add(new Opportunity(doc));
             }
-            LogManager.getLogger("OpportunityDAO").info("Opportunities found: " + opportunities.size());
             return opportunities;
         } catch (Exception ex) {
             throw new DAOException(ex);

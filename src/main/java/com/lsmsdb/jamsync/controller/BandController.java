@@ -26,7 +26,6 @@ public class BandController {
         this.bandService = BandServiceFactory.create().getService();
         this.registeredUserService = RegisteredUserServiceFactory.create().getService();
         this.musicianService = MusicianServiceFactory.create().getService();
-
     }
 
     @PostMapping("/")
@@ -129,6 +128,19 @@ public class BandController {
             boolean result = bandService.removeMember(band.get_id(), musician.get_id());
 
             return new Response(false, "", result);
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
+    @GetMapping("/{id}/members")
+    public Response getMembers(@PathVariable String id) {
+        try {
+            if (id == null || id.isEmpty()) {
+                return new Response(true, "Band ID is required", null);
+            }
+
+            return new Response(false, "", bandService.getMembers(id));
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }

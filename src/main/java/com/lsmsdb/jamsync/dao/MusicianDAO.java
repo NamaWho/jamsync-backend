@@ -212,11 +212,24 @@ public class MusicianDAO {
 
     }
 
+    public boolean checkFollow(String id, String userId, String type) throws DAOException {
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            return session.executeRead(tx -> {
+                String query = String.format("MATCH (follower:Musician {_id: $followerId})-[r:FOLLOWS]->(u:%s {_id: $followedId}) RETURN r", type);
+                Result result = tx.run(query, Values.parameters("followerId", id, "followedId", userId));
+                return result.hasNext();
+            });
+        } catch (Neo4jException e) {
+            throw new DAOException("Error while checking follow");
+        }
+    }
+
     public void follow(String id, String followedId, String type) throws DAOException {
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             session.executeWrite(tx -> {
                 // Check if the relationship already exists
                 String checkQuery = String.format("MATCH (follower:Musician {_id: $followerId})-[r:FOLLOWS]->(u:%s {_id: $followedId}) RETURN r", type);
+                LogManager.getLogger("DAO").info(checkQuery);
                 Result checkResult = tx.run(checkQuery, Values.parameters("followerId", id, "followedId", followedId));
                 if (checkResult.hasNext()) {
                     throw new RuntimeException("The musician is already following this user.");
@@ -224,6 +237,7 @@ public class MusicianDAO {
 
                 String query = String.format("MATCH (follower:Musician {_id: $followerId}), (followed:%s {_id: $followedId}) " +
                         "CREATE (follower)-[:FOLLOWS]->(followed)", type);
+                LogManager.getLogger("DAO").info("Running follow query: {}", query);
                 tx.run(query, Values.parameters("followerId", id, "followedId", followedId));
                 return 0;
             });
@@ -294,4 +308,5 @@ public class MusicianDAO {
 
         return suggestedOpportunities;
     }
+
 }

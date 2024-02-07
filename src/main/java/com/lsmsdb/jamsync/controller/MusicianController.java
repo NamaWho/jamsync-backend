@@ -89,12 +89,26 @@ public class MusicianController {
         }
     }
 
-    @PostMapping("/{id}/follow")
-    public Response follow(@PathVariable String id, @RequestParam String userId, @RequestParam String type) {
-        if (!type.equals("Musician") && !type.equals("Band")) {
+    @GetMapping("/{id}/checkFollow")
+    public Response checkFollow(@PathVariable String id, @RequestParam String userId, @RequestParam String type) {
+        if (!type.equals("musician") && !type.equals("band")) {
             return new Response(true, "Invalid type", null);
         }
         try {
+            type = type.equals("musician") ? "Musician" : "Band";
+            return new Response(false,"", musicianService.checkFollow(id, userId, type));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
+    @PostMapping("/{id}/follow")
+    public Response follow(@PathVariable String id, @RequestParam String userId, @RequestParam String type) {
+        if (!type.equals("musician") && !type.equals("band")) {
+            return new Response(true, "Invalid type", null);
+        }
+        try {
+            type = type.equals("musician") ? "Musician" : "Band";
             musicianService.follow(id, userId, type);
             return new Response(false,"", null);
         } catch (BusinessException ex) {
@@ -104,10 +118,11 @@ public class MusicianController {
 
     @PostMapping("/{id}/unfollow")
     public Response unfollow(@PathVariable String id, @RequestParam String userId, @RequestParam String type) {
-        if (!type.equals("Musician") && !type.equals("Band")) {
+        if (!type.equals("musician") && !type.equals("band")) {
             return new Response(true, "Invalid type", null);
         }
         try {
+            type = type.equals("musician") ? "Musician" : "Band";
             musicianService.unfollow(id, userId, type);
             return new Response(false,"", null);
         } catch (BusinessException ex) {

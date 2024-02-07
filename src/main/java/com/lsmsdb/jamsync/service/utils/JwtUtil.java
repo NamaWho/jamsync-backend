@@ -23,6 +23,7 @@ public class JwtUtil {
         claims.put("username", user.getString("username"));
         claims.put("profilePictureUrl", user.getString("profilePictureUrl"));
         claims.put("id", user.getString("_id"));
+        claims.put("contactEmail", user.getString("contactEmail"));
         if (type.equals("musician")) {
             claims.put("firstName", user.getString("firstName"));
             claims.put("lastName", user.getString("lastName"));

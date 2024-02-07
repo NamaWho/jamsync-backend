@@ -37,7 +37,7 @@ public class MongoUpdater {
     private MongoUpdater() {
         LogManager.getLogger("MongoUpdater").info("MongoUpdater constructor called...");
         // Schedule the updater to run every 2 minutes
-        scheduler.scheduleAtFixedRate(this::updateMongoData, 0, 20, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::updateMongoData, 0, 1, TimeUnit.MINUTES);
     }
 
     public static MongoUpdater getInstance() { return updater; }

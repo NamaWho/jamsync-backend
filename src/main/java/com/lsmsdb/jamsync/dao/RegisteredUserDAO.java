@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class RegisteredUserDAO {
-
     /**
      * Search for a user by some filters
      * @param type the type of user to search for
