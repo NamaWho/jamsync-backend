@@ -17,48 +17,6 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class Opportunity {
-    /**
-     * _id, --> INDEX
-     *     location: [ --> INDEX
-     *         city,
-     *         country
-     *         state,
-     *         lat,
-     *         long
-     *     ],
-     *     title,
-     *     description,
-     *     role,
-     *     instruments: [],
-     *     genres: [],
-     *     minimumAge,
-     *     maximumAge,
-     *     gender,
-     *     createdAt,
-     *     modifiedAt,
-     *     expiresAt,
-     *     visits,
-     *     publisher: {
-     *         _id
-     *         type,
-     *         username,
-     *         profilePictureUrl
-     *     },
-     *     applications: [
-     *         {
-     *             _id, -- INDEX ON THIS (this is the index of the APPLICATION itself)
-     *             createdAt,
-     *             applicant: {
-     *                 _id
-     *                 username,
-     *                 profilePictureUrl,
-     *                 contactEmail
-     *             },
-     *             text,
-     *             status
-     *         }
-     *     ]
-     */
     private String _id;
     private Location location;
     private String title;
@@ -68,9 +26,8 @@ public class Opportunity {
     private List<String> genres;
     private int minimumAge;
     private int maximumAge;
-    private char gender;
+    private String gender;
     private LocalDate createdAt;
-    private LocalDate modifiedAt;
     private LocalDate expiresAt;
     private Integer visits;
     private Document publisher;
@@ -84,27 +41,15 @@ public class Opportunity {
         this.role = d.getString("role");
         this.instruments = (d.get("instruments") == null || d.get("instruments").toString().isEmpty()) ? null : (List<String>) d.get("instruments");
         this.genres = (List<String>) d.get("genres");
-        // parseInteger minimum and maximum age
         this.minimumAge = d.getInteger("minimumAge") == null ? 0 : d.getInteger("minimumAge");
         this.maximumAge = d.getInteger("maximumAge") == null ? 0 : d.getInteger("maximumAge");
-        //Object genderObj = d.get("gender");
-        //this.gender = genderObj == null ? '-' : ((Character) genderObj);
-        this.gender = (d.getString("gender") == null || d.getString("gender").isEmpty()) ? '-' : d.getString("gender").charAt(0);
-
-        LogManager.getLogger().info("parsing opportunity");
+        this.gender = (d.getString("gender") == null || d.getString("gender").isEmpty()) ? "-" : d.getString("gender");
 
         String creationDateTimeString = d.getString("createdAt");
         if(creationDateTimeString.length() > 10) {
             this.createdAt = LocalDateTime.parse(creationDateTimeString).toLocalDate();
         } else {
             this.createdAt = LocalDate.parse(creationDateTimeString);
-        }
-
-        String lastUpdateDateTimeString = d.getString("modifiedAt");
-        if(lastUpdateDateTimeString.length() > 10) {
-            this.modifiedAt = LocalDateTime.parse(lastUpdateDateTimeString).toLocalDate();
-        } else {
-            this.modifiedAt = LocalDate.parse(lastUpdateDateTimeString);
         }
 
         String expiresAtString = d.getString("expiresAt");
@@ -135,7 +80,6 @@ public class Opportunity {
         document.put("maximumAge", this.maximumAge);
         document.put("gender", this.gender);
         document.put("createdAt", this.createdAt.toString());
-        document.put("modifiedAt", this.modifiedAt.toString());
         document.put("expiresAt", this.expiresAt.toString());
         document.put("visits", this.visits);
         document.put("publisher", this.publisher);
