@@ -1,7 +1,9 @@
 package com.lsmsdb.jamsync;
 
+import com.lsmsdb.jamsync.dao.BandDAO;
 import com.lsmsdb.jamsync.dao.MusicianDAO;
 import com.lsmsdb.jamsync.dao.exception.DAOException;
+import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.repository.MongoDriver;
@@ -23,7 +25,7 @@ class JamsyncApplicationTests {
 
 
 		@Test
-		public void testGetSuggestedOpportunities() {
+		public void testGetSuggestedOpportunitiesToMusician() {
 			MusicianDAO musicianDAO = new MusicianDAO();
 			System.out.println("salam");
 
@@ -57,6 +59,42 @@ class JamsyncApplicationTests {
 				System.out.println("No musician document found in MongoDB.");
 			}
 		}
+	@Test
+	public void testGetSuggestedOpportunitiesToBand() {
+		BandDAO bandDAO = new BandDAO();
+		System.out.println("salam");
+
+		// Retrieve a musician document from MongoDB
+		// Replace 'musicians' with the name of your MongoDB collection for musicians
+		MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.BAND);
+		Document bandDoc = collection.find().first();
+		System.out.println("salam"+bandDoc);
+
+		if (bandDoc != null) {
+			Band testBand = new Band(bandDoc);
+			System.out.println(testBand.getLocation().getCity());
+			System.out.println(testBand.getLocation().getCountry());
+			System.out.println(testBand.getGenres());
+			try {
+				List<Opportunity> suggestedOpportunities = bandDAO.getSuggestedOpportunities(testBand);
+				//System.out.println("salam"+suggestedOpportunities);
+				// Process the suggested opportunities as per your requirements
+				// For example, you can print the details of each opportunity
+				for (Opportunity opportunity : suggestedOpportunities) {
+					System.out.println(opportunity.getLocation().getState());
+					System.out.println(opportunity.getCreatedAt());
+					System.out.println(opportunity.getGenres());
+					System.out.println(opportunity.getInstruments());
+					System.out.println(opportunity.getPublisher());
+
+				}
+			} catch (DAOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("No band document found in MongoDB.");
+		}
+	}
 	}
 
 

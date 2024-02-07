@@ -189,4 +189,5 @@ public class OpportunityDAO {
             throw new DAOException(ex);
         }
     }
+
 }

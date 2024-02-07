@@ -1,9 +1,7 @@
 package com.lsmsdb.jamsync.dao;
 
 import com.lsmsdb.jamsync.dao.exception.DAOException;
-import com.lsmsdb.jamsync.model.Band;
-import com.lsmsdb.jamsync.model.Credentials;
-import com.lsmsdb.jamsync.model.Musician;
+import com.lsmsdb.jamsync.model.*;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
@@ -12,11 +10,15 @@ import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.FindOneAndReplaceOptions;
 import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Position;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.neo4j.driver.Record;
+import org.bson.conversions.Bson;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.Values;
@@ -26,6 +28,8 @@ import org.neo4j.driver.types.TypeSystem;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import java.time.LocalDate;
 
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
 import static com.mongodb.client.model.Filters.eq;
@@ -260,5 +264,57 @@ public class BandDAO {
             LogManager.getLogger(BandDAO.class).error("Exception: " + e.getMessage());
             throw new DAOException(e.getMessage());
         }
+    }
+
+    public List<Opportunity> getSuggestedOpportunities(Band b) throws DAOException {
+        List<Opportunity> suggestedOpportunities = new ArrayList<>();
+        List<String> bandGenres = b.getGenres();
+        Location bandLocation = b.getLocation();
+        String bandCountry = bandLocation.getCountry().isEmpty() ? bandLocation.getState() : bandLocation.getCountry();
+        LogManager.getLogger("suggestion").info(bandCountry);
+        System.out.println("HELLOOOO" + bandCountry);
+        Integer maxDistance = 50;
+        LocalDate sixtyDaysAgo = LocalDate.now().minusDays(60);
+        String today = LocalDate.now().toString();
+
+        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+
+        Bson expiresAtFilter = Filters.or(
+                Filters.eq("expiresAt", null),
+                Filters.gte("expiresAt", today)
+        );
+        Bson bandCountryFilter = Filters.or(
+                Filters.eq("location.state", bandCountry),
+                Filters.eq("location.country", bandCountry)
+        );
+        Bson createdAtFilter = Filters.gte("createdAt", sixtyDaysAgo.toString());
+        Bson genresFilter = Filters.in("genres", bandGenres);
+        Bson typeFilter = Filters.eq("publisher.type", "Musician");
+
+        List<Bson> filters = new ArrayList<>();
+        filters.add(expiresAtFilter);
+        filters.add(bandCountryFilter);
+        filters.add(createdAtFilter);
+        filters.add(genresFilter);
+        filters.add(typeFilter);
+
+        if (bandLocation != null && !bandLocation.getCity().isEmpty()) {
+            Point musicianPoint = new Point(new Position(bandLocation.getGeojson().getCoordinates().get(0),
+                    bandLocation.getGeojson().getCoordinates().get(1)));
+            Bson geoNearFilter = Filters.near("location.geojson", musicianPoint, maxDistance.doubleValue() * 1000, null);
+            filters.add(geoNearFilter);
+        }
+
+        Bson query = Filters.and(filters);
+        System.out.println(filters);
+        MongoCursor<Document> cursor = collection.find(query).iterator();
+        while (cursor.hasNext()) {
+            Document opportunityDoc = cursor.next();
+            Opportunity opportunity = new Opportunity(opportunityDoc);
+            suggestedOpportunities.add(opportunity);
+        }
+        cursor.close();
+
+        return suggestedOpportunities;
     }
 }
