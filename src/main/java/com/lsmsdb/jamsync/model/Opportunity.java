@@ -82,11 +82,8 @@ public class Opportunity {
         this.title = d.getString("title");
         this.description = d.getString("description");
         this.role = d.getString("role");
-        LogManager.getLogger().info("parsing opportunity");
         this.instruments = (d.get("instruments") == null || d.get("instruments").toString().isEmpty()) ? null : (List<String>) d.get("instruments");
-        LogManager.getLogger().info("parsing opportunity2");
         this.genres = (List<String>) d.get("genres");
-        LogManager.getLogger().info("parsing opportunity3");
         // parseInteger minimum and maximum age
         this.minimumAge = d.getInteger("minimumAge") == null ? 0 : d.getInteger("minimumAge");
         this.maximumAge = d.getInteger("maximumAge") == null ? 0 : d.getInteger("maximumAge");
