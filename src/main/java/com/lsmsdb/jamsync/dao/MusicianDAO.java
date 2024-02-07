@@ -24,8 +24,13 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Position;
 
 
+
+import java.time.LocalDate;
 import java.util.*;
 
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
@@ -250,26 +255,38 @@ public class MusicianDAO {
         List<String> musicianGenres = m.getGenres();
         List<String> musicianInstruments = m.getInstruments();
         Location musicianLocation = m.getLocation();
+        String musicianCountry = musicianLocation.getCountry();
+        Integer maxDistance = 50000;
+        LocalDate sixtyDaysAgo = LocalDate.now().minusDays(60);
 
-        // Calculate the date 60 days ago
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, -60);
-        Date sixtyDaysAgo = cal.getTime();
-
-        // MongoDB query to filter opportunities
-        Document query = new Document();
-        query.append("createdAt", new Document("$gt", sixtyDaysAgo));
-        query.append("expired_at", new Document("$gt", new Date()));
-        query.append("country", musicianLocation.getCountry());
-        query.append("city", musicianLocation.getCity());
-
-        // Execute the query and retrieve the suggested opportunities
-        // Replace 'opportunities' with the name of your MongoDB collection
         MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+
+        Bson musicianCountryFilter = Filters.eq("location.state", musicianCountry);
+        Bson createdAtFilter = Filters.gte("createdAt", sixtyDaysAgo.toString());
+        Bson genresFilter = Filters.in("genres", musicianGenres);
+        Bson instrumentsFilter = Filters.in("instruments", musicianInstruments);
+        Bson typeFilter = Filters.eq("publisher.type", "Band");
+
+        List<Bson> filters = new ArrayList<>();
+        filters.add(Filters.eq("expiresAt", null));
+        filters.add(musicianCountryFilter);
+        filters.add(createdAtFilter);
+        filters.add(genresFilter);
+        filters.add(instrumentsFilter);
+        filters.add(typeFilter);
+
+        if (musicianLocation != null && !musicianLocation.getCity().isEmpty()) {
+           Point musicianPoint = new Point(new Position(musicianLocation.getGeojson().getCoordinates().get(0),
+                   musicianLocation.getGeojson().getCoordinates().get(1)));
+            Bson geoNearFilter = Filters.near("location.geojson", musicianPoint, maxDistance.doubleValue() * 1000, null);
+            filters.add(geoNearFilter);
+        }
+
+        Bson query = Filters.and(filters);
+
         MongoCursor<Document> cursor = collection.find(query).iterator();
         while (cursor.hasNext()) {
             Document opportunityDoc = cursor.next();
-            // Convert the Document to Opportunity object and add it to the list
             Opportunity opportunity = new Opportunity(opportunityDoc);
             suggestedOpportunities.add(opportunity);
         }
