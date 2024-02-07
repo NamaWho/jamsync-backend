@@ -256,7 +256,7 @@ public class MusicianDAO {
         List<String> musicianInstruments = m.getInstruments();
         Location musicianLocation = m.getLocation();
         String musicianCountry = musicianLocation.getCountry();
-        Integer maxDistance = 50000;
+        Integer maxDistance = 50;
         LocalDate sixtyDaysAgo = LocalDate.now().minusDays(60);
 
         MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
