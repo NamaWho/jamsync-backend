@@ -7,6 +7,7 @@ import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.repository.MongoDriver;
+import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
 import com.mongodb.client.MongoCollection;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,13 @@ import org.bson.Document;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.neo4j.driver.*;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class JamsyncApplicationTests {
@@ -241,6 +249,34 @@ class JamsyncApplicationTests {
 			System.out.println("No band document found in MongoDB.");
 		}
 	}
+
+
+
+
+
+	@Test
+	public void testSuggestOpportunitiesByFollowers() {
+		// Create a mock Musician object for testing
+		Musician musician = new Musician();
+		musician.set_id("fd6dda21-6cc7-406d-8e77-e2ed9476bb2b");
+
+		// Call the suggestOpportunitiesByFollowers method
+		try {
+			MusicianDAO obj = new MusicianDAO();
+			List<Document> documents = obj.suggestOpportunitiesByFollowers(musician);
+
+			// Print out the size of the documents list
+			System.out.println("Number of documents returned: " + documents.size());
+
+			// Assert that the list of documents is not null
+			// You can add more specific assertions based on your expected output
+			assertEquals(false, documents.isEmpty());
+		} catch (DAOException e) {
+			// Handle any exceptions thrown during the test
+			e.printStackTrace();
+		}
 	}
+
+}
 
 
