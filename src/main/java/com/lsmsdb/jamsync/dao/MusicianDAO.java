@@ -14,7 +14,6 @@ import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import com.mongodb.client.*;
 import com.mongodb.client.model.FindOneAndReplaceOptions;
 import com.mongodb.client.model.ReturnDocument;
-import lombok.extern.java.Log;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -27,14 +26,9 @@ import org.neo4j.driver.exceptions.TransactionTerminatedException;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Sorts;
 import java.util.Arrays;
-import org.bson.Document;
-import org.bson.conversions.Bson;
 import java.util.List;
 import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.Projections;
 import java.util.ArrayList;
-import com.mongodb.Block;
-import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
@@ -42,16 +36,11 @@ import com.mongodb.client.model.geojson.Position;
 
 
 import java.time.LocalDate;
-import java.util.*;
+
 
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
 import static com.mongodb.client.model.Filters.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
 
 public class MusicianDAO {
     private MongoClient mongoClient;
@@ -352,5 +341,4 @@ public class MusicianDAO {
 
         return suggestedOpportunities;
     }
-
 }

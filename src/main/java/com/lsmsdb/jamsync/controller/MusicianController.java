@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import com.lsmsdb.jamsync.service.MusicianService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 
-import org.bson.Document;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/musicians")
