@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import com.lsmsdb.jamsync.service.MusicianService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 
+import org.bson.Document;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/musicians")
 public class MusicianController {
@@ -136,6 +139,14 @@ public class MusicianController {
             return new Response(false,"", musicianService.getSuggestedOpportunities(m));
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
+        }
+    }
+    @GetMapping("/topPublishers")
+    public Response getTopPublishersByApplications() {
+        try {
+            return new Response(false, "", musicianService.getTopPublishersByApplications());
+        } catch (BusinessException e) {
+            return new Response(true, e.getMessage(),null);
         }
     }
 }

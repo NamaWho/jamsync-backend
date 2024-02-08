@@ -6,6 +6,7 @@ import com.lsmsdb.jamsync.service.MusicianService;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.dao.exception.DAOException;
+import org.bson.Document;
 
 import java.util.List;
 
@@ -91,5 +92,10 @@ public class MusicianServiceImpl implements MusicianService {
         } catch (DAOException ex) {
             throw new BusinessException(ex);
         }
+    }
+
+    @Override
+    public List<Document> getTopPublishersByApplications() throws BusinessException{
+        return musicianDAO.getTopPublishersByApplications();
     }
 }

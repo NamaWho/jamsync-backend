@@ -24,6 +24,17 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Sorts;
+import java.util.Arrays;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import java.util.List;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Projections;
+import java.util.ArrayList;
+import com.mongodb.Block;
+import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
@@ -36,9 +47,21 @@ import java.util.*;
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
 import static com.mongodb.client.model.Filters.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 
 public class MusicianDAO {
-
+    private MongoClient mongoClient;
+    private MongoDatabase database;
+    private MongoCollection<Document> collection;
+    public MusicianDAO(){
+        mongoClient = MongoClients.create("mongodb://localhost:27017");
+        database = mongoClient.getDatabase("jamSyncDB");
+        collection = database.getCollection("opportunity");
+    }
     public void createMusician(Musician musician) throws DAOException {
         // hash the password
         String digest = hashPassword(musician.getCredentials().getPassword());
@@ -262,6 +285,20 @@ public class MusicianDAO {
         } catch (RuntimeException e) {
             throw new DAOException(e.getMessage());
         }
+    }
+    public List<Document> getTopPublishersByApplications() {
+        return collection.aggregate(Arrays.asList(
+                Aggregates.group("$publisher._id",
+                        Accumulators.first("username", "$publisher.username"),
+                        Accumulators.first("profilePictureUrl", "$publisher.profilePictureUrl"),
+                        Accumulators.sum("totalOpportunities", 1),
+                        Accumulators.sum("totalApplications", new Document("$size", "$applications")),
+                        Accumulators.sum("acceptedApplications", new Document("$sum", new Document("$cond", Arrays.asList(new Document("$eq", Arrays.asList("$this.status", 1)), 1, 0))))
+                        ),
+                new Document("$addFields", new Document("acceptanceRate", new Document("$cond", Arrays.asList(new Document("$eq", Arrays.asList("$totalApplications", 0)), 0, new Document("$divide", Arrays.asList("$acceptedApplications", "$totalApplications")))))),
+                Aggregates.sort(Sorts.descending("totalApplications", "totalOpportunities", "acceptanceRate")),
+                Aggregates.limit(5)
+        )).into(new ArrayList<>());
     }
 
     public List<Opportunity> getSuggestedOpportunities(Musician m) throws DAOException {

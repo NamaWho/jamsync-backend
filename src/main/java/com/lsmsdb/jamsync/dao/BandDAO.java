@@ -34,6 +34,11 @@ import java.time.LocalDate;
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
 import static com.mongodb.client.model.Filters.eq;
 
+import com.mongodb.client.AggregateIterable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class BandDAO {
 
 
@@ -46,7 +51,7 @@ public class BandDAO {
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.BAND);
             collection.insertOne(band.toDocument());
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             throw new DAOException(ex);
         }
 
@@ -77,15 +82,15 @@ public class BandDAO {
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.BAND);
             cursor = collection.find(eq("_id", id)).iterator();
-            if(cursor.hasNext()) {
+            if (cursor.hasNext()) {
                 Document document = cursor.next();
                 //document.put("username", document.get("name"));
                 return new Band(document);
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             throw new DAOException(ex);
         } finally {
-            if(cursor != null) cursor.close();
+            if (cursor != null) cursor.close();
         }
         return null;
     }
@@ -100,7 +105,7 @@ public class BandDAO {
 
             // retrieve the old document
             MongoCursor<Document> cursor = collection.find(eq("_id", id)).iterator();
-            if(cursor.hasNext())
+            if (cursor.hasNext())
                 oldDocument = cursor.next();
             else {
                 LogManager.getLogger("BandDAO").warn("Band not found with id " + id + " in MongoDB");
@@ -114,7 +119,7 @@ public class BandDAO {
                 LogManager.getLogger("BandDAO").warn("Band not found with id " + id + " in MongoDB");
                 throw new DAOException("Band not found");
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             LogManager.getLogger("BandDAO").error("Error while updating band with id " + id + " in MongoDB");
             throw new DAOException(ex);
         }
@@ -158,7 +163,7 @@ public class BandDAO {
                 LogManager.getLogger(BandDAO.class).warn("Band not found with id " + id + " in MongoDB");
                 throw new DAOException("Band not found");
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             LogManager.getLogger("BandDAO").error("Error while deleting band with id " + id + " in MongoDB");
             throw new DAOException(ex);
         }
@@ -190,11 +195,12 @@ public class BandDAO {
             throw new DAOException(e.getMessage());
         }
     }
+
     public boolean addMember(String bandId, String musicianId) throws DAOException {
         String query = null;
         String formattedQuery = "MATCH (b:Band {_id: %s}), (m:Musician {_id: %s})" +
                 "CREATE (m)-[:MEMBER_OF]->(b)";
-         query = String.format(formattedQuery,
+        query = String.format(formattedQuery,
                 "\"" + bandId + "\"",
                 "\"" + musicianId + "\"");
 
@@ -218,6 +224,7 @@ public class BandDAO {
             throw new DAOException(e.getMessage());
         }
     }
+
     public boolean removeMember(String bandId, String musicianId) throws DAOException {
         String query = null;
         String formattedQuery = "MATCH (b:Band {_id: '%s'})<-[r:MEMBER_OF]-(m:Musician {_id: '%s'})" +
@@ -313,5 +320,8 @@ public class BandDAO {
         cursor.close();
 
         return suggestedOpportunities;
+    }
+    public List<Document> getTopUsersByApplications() {
+        return null;
     }
 }

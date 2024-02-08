@@ -4,7 +4,7 @@ import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.factory.BandServiceFactory;
-
+import org.bson.Document;
 import java.util.List;
 
 public interface MusicianService {
@@ -28,4 +28,6 @@ public interface MusicianService {
 
     List<Opportunity> getSuggestedOpportunities(Musician m) throws BusinessException;
 
+
+    List<Document> getTopPublishersByApplications() throws BusinessException;
 }
