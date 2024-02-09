@@ -320,9 +320,12 @@ public class MusicianDAO {
     }
     public List<Document> suggestOpportunitiesByFollowers(Musician musician) throws DAOException {
         String formattedQuery = "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(b:Band)-[:PUBLISHED]->(o:Opportunity)\n" +
-                "RETURN o LIMIT 10";
+                "RETURN o LIMIT 5 UNION\n" +
+                "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(fm:Musician)-[:APPLIED_FOR]->(o:Opportunity)\n" +
+                "RETURN o\n" +
+                "LIMIT 5";
 
-        String query = String.format(formattedQuery, musician.get_id());
+        String query = String.format(formattedQuery, musician.get_id(),musician.get_id());
         System.out.println(query);
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             String finalQuery = query;
