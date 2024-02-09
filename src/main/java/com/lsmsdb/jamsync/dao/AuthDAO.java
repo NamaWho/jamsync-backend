@@ -49,6 +49,10 @@ public class AuthDAO {
         try(MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(collectionType).find(eq("credentials.user", user)).iterator()){
             if(cursor.hasNext()){
                 Document doc = cursor.next();
+
+                if(doc.getBoolean("isBanned"))
+                    return null;
+
                 String hashedPassword = new Credentials((Document) doc.get("credentials")).getPassword();
                 String hashedInputPassword = HashUtil.hashPassword(password);
 

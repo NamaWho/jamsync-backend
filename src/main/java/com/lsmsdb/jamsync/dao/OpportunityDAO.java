@@ -9,10 +9,7 @@ import com.lsmsdb.jamsync.routine.MongoTask;
 import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Field;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Sorts;
+import com.mongodb.client.model.*;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
 import lombok.extern.java.Log;
@@ -200,6 +197,9 @@ public class OpportunityDAO {
         return collection.aggregate(Arrays.asList(
                 Aggregates.addFields(new Field("numApplications", new Document("$size", "$applications"))),
                 Aggregates.sort(Sorts.descending("numApplications")),
+                Aggregates.project(Projections.fields(
+                        Projections.include("_id", "title", "numApplications", "publisher.type")
+                )),
                 Aggregates.limit(5)
         )).into(new ArrayList<>());
     }
