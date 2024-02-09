@@ -140,7 +140,7 @@ public class MusicianController {
         }
     }
 
-    @PostMapping("/suggestOpportunitiesByFollowers")
+    @PostMapping("/suggestedOpportunitiesByFollowers")
     public Response suggestOpportunitiesByFollowers(@RequestBody Musician m) {
         try {
             return new Response(false, "", musicianService.suggestOpportunitiesByFollowers(m));

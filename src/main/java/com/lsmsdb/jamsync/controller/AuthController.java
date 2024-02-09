@@ -26,7 +26,6 @@ public class AuthController {
         String password = request.getString("password");
         try {
             String jwt = authService.login(type, user, password);
-            LogManager.getLogger().info(jwt);
             if (jwt != null) {
                 return new Response(false, "Login successful", jwt);
             } else {

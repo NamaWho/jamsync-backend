@@ -46,11 +46,16 @@ public class AuthDAO {
                 throw new IllegalArgumentException("Invalid type");
         }
 
+        LogManager.getLogger(this.getClass()).info("type: " + type);
+
         try(MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(collectionType).find(eq("credentials.user", user)).iterator()){
             if(cursor.hasNext()){
                 Document doc = cursor.next();
+                LogManager.getLogger(this.getClass()).info("doc: " + doc.toJson());
 
-                if(doc.getBoolean("isBanned"))
+                boolean isBanned = doc.getBoolean("isBanned");
+                LogManager.getLogger(this.getClass()).info("isBanned: " + isBanned);
+                if(isBanned)
                     return null;
 
                 String hashedPassword = new Credentials((Document) doc.get("credentials")).getPassword();

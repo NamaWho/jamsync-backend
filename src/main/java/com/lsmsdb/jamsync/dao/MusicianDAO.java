@@ -273,7 +273,7 @@ public class MusicianDAO {
         List<String> musicianInstruments = m.getInstruments();
         Location musicianLocation = m.getLocation();
         String musicianCountry = musicianLocation.getCountry();
-        Integer maxDistance = 50;
+        Integer maxDistance = 150;
         LocalDate sixtyDaysAgo = LocalDate.now().minusDays(60);
         String today = LocalDate.now().toString();
 
@@ -287,16 +287,17 @@ public class MusicianDAO {
                 Filters.eq("location.state", musicianCountry),
                 Filters.eq("location.country", musicianCountry));
         Bson createdAtFilter = Filters.gte("createdAt", sixtyDaysAgo.toString());
-        Bson genresFilter = Filters.in("genres", musicianGenres);
-        Bson instrumentsFilter = Filters.in("instruments", musicianInstruments);
+        Bson genresinstrumentsFilter = Filters.or(
+                Filters.in("genres", musicianGenres),
+                Filters.in("instruments", musicianInstruments)
+        );
         Bson typeFilter = Filters.eq("publisher.type", "Band");
 
         List<Bson> filters = new ArrayList<>();
         filters.add(musicianExpiresAtFilter);
         filters.add(musicianCountryFilter);
         filters.add(createdAtFilter);
-        filters.add(genresFilter);
-        filters.add(instrumentsFilter);
+        filters.add(genresinstrumentsFilter);
         filters.add(typeFilter);
 
         if (musicianLocation != null && !musicianLocation.getCity().isEmpty()) {
@@ -307,8 +308,9 @@ public class MusicianDAO {
         }
 
         Bson query = Filters.and(filters);
+        LogManager.getLogger(BandDAO.class).info("Filters: " + query);
 
-        MongoCursor<Document> cursor = collection.find(query).iterator();
+        MongoCursor<Document> cursor = collection.find(query).limit(10).iterator();
         while (cursor.hasNext()) {
             Document opportunityDoc = cursor.next();
             Opportunity opportunity = new Opportunity(opportunityDoc);
@@ -326,7 +328,6 @@ public class MusicianDAO {
                 "LIMIT 5";
 
         String query = String.format(formattedQuery, musician.get_id(),musician.get_id());
-        System.out.println(query);
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             String finalQuery = query;
             return session.readTransaction(tx -> {
