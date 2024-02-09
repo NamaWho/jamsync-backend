@@ -320,7 +320,7 @@ public class MusicianDAO {
     }
     public List<Document> suggestOpportunitiesByFollowers(Musician musician) throws DAOException {
         String formattedQuery = "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(b:Band)-[:PUBLISHED]->(o:Opportunity)\n" +
-                "RETURN o";
+                "RETURN o LIMIT 10";
 
         String query = String.format(formattedQuery, musician.get_id());
         System.out.println(query);

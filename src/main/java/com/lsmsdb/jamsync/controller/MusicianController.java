@@ -19,7 +19,7 @@ public class MusicianController {
     private MusicianService musicianService;
     private RegisteredUserService registeredUserService;
 
-    public MusicianController(){
+    public MusicianController() {
         this.musicianService = MusicianServiceFactory.create().getService();
         this.registeredUserService = RegisteredUserServiceFactory.create().getService();
     }
@@ -32,7 +32,7 @@ public class MusicianController {
 
         try {
             musicianService.createMusician(musician);
-            return new Response(false,"", null);
+            return new Response(false, "", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -42,7 +42,7 @@ public class MusicianController {
     public Response getMusicianById(@PathVariable String id) {
         try {
             Musician m = musicianService.getMusicianById(id);
-            return new Response(false,"", m);
+            return new Response(false, "", m);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -53,7 +53,7 @@ public class MusicianController {
         LogManager.getLogger("MusicianController").info("Updating musician with id " + id);
         try {
             Musician m = musicianService.updateMusicianById(id, musician);
-            return new Response(false,"", m);
+            return new Response(false, "", m);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -64,7 +64,7 @@ public class MusicianController {
         LogManager.getLogger("MusicianController").info("Deleting musician with id " + id);
         try {
             musicianService.deleteMusicianById(id);
-            return new Response(false,"", null);
+            return new Response(false, "", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -74,7 +74,7 @@ public class MusicianController {
     public Response getFollowersCount(@PathVariable String id) {
         try {
             Integer followersCount = registeredUserService.getFollowersCount(id, "Musician");
-            return new Response(false,"", followersCount);
+            return new Response(false, "", followersCount);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -84,7 +84,7 @@ public class MusicianController {
     public Response getFollowingCount(@PathVariable String id) {
         try {
             Integer followingCount = musicianService.getFollowingCount(id);
-            return new Response(false,"", followingCount);
+            return new Response(false, "", followingCount);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -97,7 +97,7 @@ public class MusicianController {
         }
         try {
             type = type.equals("musician") ? "Musician" : "Band";
-            return new Response(false,"", musicianService.checkFollow(id, userId, type));
+            return new Response(false, "", musicianService.checkFollow(id, userId, type));
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -111,7 +111,7 @@ public class MusicianController {
         try {
             type = type.equals("musician") ? "Musician" : "Band";
             musicianService.follow(id, userId, type);
-            return new Response(false,"", null);
+            return new Response(false, "", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -125,7 +125,7 @@ public class MusicianController {
         try {
             type = type.equals("musician") ? "Musician" : "Band";
             musicianService.unfollow(id, userId, type);
-            return new Response(false,"", null);
+            return new Response(false, "", null);
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
@@ -134,9 +134,20 @@ public class MusicianController {
     @PostMapping("/suggestedOpportunities")
     public Response getSuggestedOpportunities(@RequestBody Musician m) {
         try {
-            return new Response(false,"", musicianService.getSuggestedOpportunities(m));
+            return new Response(false, "", musicianService.getSuggestedOpportunities(m));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
+    @PostMapping("/suggestOpportunitiesByFollowers")
+    public Response suggestOpportunitiesByFollowers(@RequestBody Musician m) {
+        try {
+            return new Response(false, "", musicianService.suggestOpportunitiesByFollowers(m));
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
     }
 }
+
+

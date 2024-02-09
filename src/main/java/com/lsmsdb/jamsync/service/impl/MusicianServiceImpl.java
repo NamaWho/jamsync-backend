@@ -93,5 +93,13 @@ public class MusicianServiceImpl implements MusicianService {
             throw new BusinessException(ex);
         }
     }
+    @Override
+    public List<Document> suggestOpportunitiesByFollowers(Musician m) throws BusinessException {
+        try {
+            return musicianDAO.suggestOpportunitiesByFollowers(m);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
 
 }
