@@ -86,4 +86,14 @@ public class OpportunityController {
             return new Response(true, e.getMessage(), null);
         }
     }
+
+    @GetMapping("/topAppliedOpportunities")
+    public Response getTopAppliedOpportunities() {
+        try {
+            List<Document> opportunities = this.opportunityService.getTopAppliedOpportunities();
+            return new Response(false, null, opportunities);
+        } catch (Exception e) {
+            return new Response(true, e.getMessage(), null);
+        }
+    }
 }

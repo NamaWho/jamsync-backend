@@ -27,7 +27,4 @@ public interface MusicianService {
     void unfollow(String id, String followedId, String type) throws BusinessException;
 
     List<Opportunity> getSuggestedOpportunities(Musician m) throws BusinessException;
-
-
-    List<Document> getTopPublishersByApplications() throws BusinessException;
 }

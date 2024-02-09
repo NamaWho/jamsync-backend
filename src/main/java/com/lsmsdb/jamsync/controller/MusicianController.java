@@ -139,12 +139,4 @@ public class MusicianController {
             return new Response(true, ex.getMessage(), null);
         }
     }
-    @GetMapping("/topPublishers")
-    public Response getTopPublishersByApplications() {
-        try {
-            return new Response(false, "", musicianService.getTopPublishersByApplications());
-        } catch (BusinessException e) {
-            return new Response(true, e.getMessage(),null);
-        }
-    }
 }

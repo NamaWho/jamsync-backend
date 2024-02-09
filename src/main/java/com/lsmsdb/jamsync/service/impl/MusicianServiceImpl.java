@@ -94,8 +94,4 @@ public class MusicianServiceImpl implements MusicianService {
         }
     }
 
-    @Override
-    public List<Document> getTopPublishersByApplications() throws BusinessException{
-        return musicianDAO.getTopPublishersByApplications();
-    }
 }

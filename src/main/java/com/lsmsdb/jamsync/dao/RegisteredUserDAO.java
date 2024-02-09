@@ -8,8 +8,12 @@ import com.lsmsdb.jamsync.model.RegisteredUser;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +25,7 @@ import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.types.Node;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -127,4 +132,23 @@ public class RegisteredUserDAO {
             throw new DAOException("Error while getting followers count");
         }
     }
+
+    public List<Document> getTopPublishers() throws DAOException {
+        LogManager.getLogger("MusicianDAO").info("Getting top publishers by applications");
+        /*MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+        return collection.aggregate(Arrays.asList(
+                Aggregates.group("$publisher._id",
+                        Accumulators.first("username", "$publisher.username"),
+                        Accumulators.first("profilePictureUrl", "$publisher.profilePictureUrl"),
+                        Accumulators.sum("totalOpportunities", 1),
+                        Accumulators.sum("totalApplications", new Document("$size", "$applications")),
+                        Accumulators.sum("acceptedApplications", new Document("$sum", new Document("$cond", Arrays.asList(new Document("$eq", Arrays.asList("$this.status", 1)), 1, 0))))
+                ),
+                new Document("$addFields", new Document("acceptanceRate", new Document("$cond", Arrays.asList(new Document("$eq", Arrays.asList("$totalApplications", 0)), 0, new Document("$divide", Arrays.asList("$acceptedApplications", "$totalApplications")))))),
+                Aggregates.sort(Sorts.descending("totalApplications", "totalOpportunities", "acceptanceRate")),
+                Aggregates.limit(5)
+        )).into(new ArrayList<>());*/
+        return null;
+    }
+
 }

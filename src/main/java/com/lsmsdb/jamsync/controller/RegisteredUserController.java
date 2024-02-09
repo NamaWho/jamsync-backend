@@ -4,6 +4,7 @@ import com.lsmsdb.jamsync.controller.response.Response;
 import com.lsmsdb.jamsync.model.Location;
 import com.lsmsdb.jamsync.model.RegisteredUser;
 import com.lsmsdb.jamsync.service.RegisteredUserService;
+import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.service.factory.MusicianServiceFactory;
 import com.lsmsdb.jamsync.service.factory.RegisteredUserServiceFactory;
 import org.apache.logging.log4j.LogManager;
@@ -59,6 +60,16 @@ public class RegisteredUserController {
         } catch (Exception e) {
             LogManager.getLogger("RegisteredUserController").error(e);
             return new Response(true, e.getMessage(), null);
+        }
+    }
+
+
+    @GetMapping("/topPublishers")
+    public Response getTopPublishersByApplications() {
+        try {
+            return new Response(false, "", registeredUserService.getTopPublishers());
+        } catch (BusinessException e) {
+            return new Response(true, e.getMessage(),null);
         }
     }
 

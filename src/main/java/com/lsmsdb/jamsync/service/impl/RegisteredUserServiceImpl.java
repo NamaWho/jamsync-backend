@@ -5,6 +5,7 @@ import com.lsmsdb.jamsync.model.Location;
 import com.lsmsdb.jamsync.model.RegisteredUser;
 import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
+import org.bson.Document;
 
 import java.util.List;
 
@@ -25,6 +26,15 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
     public Integer getFollowersCount(String _id, String type) throws BusinessException {
         try {
             return registeredUserDAO.getFollowersCount(_id, type);
+        } catch (Exception e) {
+            throw new BusinessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Document> getTopPublishers() throws BusinessException {
+        try {
+            return registeredUserDAO.getTopPublishers();
         } catch (Exception e) {
             throw new BusinessException(e.getMessage());
         }

@@ -9,7 +9,10 @@ import com.lsmsdb.jamsync.routine.MongoTask;
 import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
 import lombok.extern.java.Log;
@@ -22,6 +25,7 @@ import org.neo4j.driver.exceptions.TransactionTerminatedException;
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -190,4 +194,13 @@ public class OpportunityDAO {
         }
     }
 
+    public List<Document> getTopAppliedOpportunities() throws DAOException {
+        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+
+        return collection.aggregate(Arrays.asList(
+                Aggregates.addFields(new Field("numApplications", new Document("$size", "$applications"))),
+                Aggregates.sort(Sorts.descending("numApplications")),
+                Aggregates.limit(5)
+        )).into(new ArrayList<>());
+    }
 }

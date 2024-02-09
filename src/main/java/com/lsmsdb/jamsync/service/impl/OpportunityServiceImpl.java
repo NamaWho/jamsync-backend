@@ -8,6 +8,7 @@ import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.lsmsdb.jamsync.service.OpportunityService;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.dao.exception.DAOException;
+import org.bson.Document;
 
 import java.util.List;
 
@@ -51,4 +52,12 @@ public class OpportunityServiceImpl implements OpportunityService {
         }
     }
 
+    @Override
+    public List<Document> getTopAppliedOpportunities() throws BusinessException {
+        try {
+            return opportunityDAO.getTopAppliedOpportunities();
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
 }
