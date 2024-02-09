@@ -17,10 +17,8 @@ import com.mongodb.client.model.ReturnDocument;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.Values;
 import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
 import com.mongodb.client.model.Aggregates;
@@ -32,7 +30,7 @@ import java.util.ArrayList;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
-
+import org.neo4j.driver.types.Node;
 
 
 import java.time.LocalDate;
@@ -319,5 +317,30 @@ public class MusicianDAO {
         cursor.close();
 
         return suggestedOpportunities;
+    }
+    public List<Document> suggestOpportunitiesByFollowers(Musician musician) throws DAOException {
+        String formattedQuery = "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(b:Band)-[:PUBLISHED]->(o:Opportunity)\n" +
+                "RETURN o";
+
+        String query = String.format(formattedQuery, musician.get_id());
+        System.out.println(query);
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            String finalQuery = query;
+            return session.readTransaction(tx -> {
+                List<Record> records = tx.run(finalQuery).list();
+                List<Document> documents = new ArrayList<>();
+                for (Record record : records) {
+                    Value value = record.get("o");
+                    if (value.type().name().equals("NODE")) {
+                        Node node = value.asNode();
+                        documents.add(new Document(node.asMap()));
+                    }
+                }
+                return documents;
+            });
+        } catch (Exception e) {
+            LogManager.getLogger(BandDAO.class).error("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
     }
 }

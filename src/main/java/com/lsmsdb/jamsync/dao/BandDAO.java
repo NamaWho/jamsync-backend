@@ -17,11 +17,9 @@ import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
-import org.neo4j.driver.Record;
+import org.neo4j.driver.*;
 import org.bson.conversions.Bson;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.Value;
-import org.neo4j.driver.Values;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
 import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.TypeSystem;
@@ -321,6 +319,7 @@ public class BandDAO {
 
         return suggestedOpportunities;
     }
+
     public List<Document> getTopUsersByApplications() {
         return null;
     }
