@@ -203,4 +203,40 @@ public class OpportunityDAO {
                 Aggregates.limit(5)
         )).into(new ArrayList<>());
     }
+
+    public List<Document> getOpportunitiesByAgeRange() throws DAOException {
+        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+
+        return collection.aggregate(Arrays.asList(
+                // add a field to check if the opportunity is for musicians, checking the type of the publisher
+                Aggregates.addFields(new Field("isForMusicians", new Document("$eq", Arrays.asList("$publisher.type", "Band")))),
+                // filter the opportunities that are for musicians
+                Aggregates.match(Filters.eq("isForMusicians", true)),
+                // filter the opportunities that have a minimum and maximum age
+                Aggregates.match(Filters.and(
+                        Filters.ne("minimumAge", null),
+                        Filters.and(
+                            Filters.ne("maximumAge", null),
+                            Filters.ne("maximumAge", 0)
+                        )
+                )),
+                // add a field to calculate the average age of the musicians
+                Aggregates.addFields(new Field("averageAge", new Document("$avg", Arrays.asList("$minimumAge", "$maximumAge")))),
+                // group the opportunities by the average age creating 10 groups of 10 years each
+                Aggregates.group(new Document("averageAge",
+                        new Document("$subtract", Arrays.asList("$averageAge",
+                                new Document("$mod", Arrays.asList("$averageAge", 10))
+                        ))
+                ), Accumulators.sum("count", 1)),
+                // project the fields to be returned
+                Aggregates.project(Projections.fields(
+                        Projections.include("_id", "count"),
+                        Projections.computed("ageRange", new Document("$concat", Arrays.asList(
+                                new Document("$toString", "$_id.averageAge"),
+                                new Document("$concat", Arrays.asList(" - ", new Document("$toString", new Document("$add", Arrays.asList("$_id.averageAge", 10)))))
+                        )))
+                )),
+                Aggregates.sort(Sorts.ascending("_id"))
+        )).into(new ArrayList<>());
+    }
 }

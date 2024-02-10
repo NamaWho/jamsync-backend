@@ -19,4 +19,6 @@ public interface OpportunityService {
     List<Opportunity> searchOpportunities(String forUser, String publisherUsername, List<String> genres, List<String> instruments, Location location, Integer maxDistance, Integer minAge, Integer maxAge, String gender, Integer page, Integer pageSize) throws BusinessException;
 
     List<Document> getTopAppliedOpportunities() throws BusinessException;
+
+    List<Document> getOpportunitiesByAgeRange() throws BusinessException;
 }

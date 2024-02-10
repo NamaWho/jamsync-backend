@@ -60,4 +60,13 @@ public class OpportunityServiceImpl implements OpportunityService {
             throw new BusinessException(ex);
         }
     }
+
+    @Override
+    public List<Document> getOpportunitiesByAgeRange() throws BusinessException {
+        try {
+            return opportunityDAO.getOpportunitiesByAgeRange();
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
 }

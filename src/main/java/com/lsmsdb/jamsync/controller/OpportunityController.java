@@ -96,4 +96,14 @@ public class OpportunityController {
             return new Response(true, e.getMessage(), null);
         }
     }
+
+    @GetMapping("/opportunitiesByAgeRange")
+    public Response getOpportunitiesByAgeRange() {
+        try {
+            List<Document> opportunities = this.opportunityService.getOpportunitiesByAgeRange();
+            return new Response(false, null, opportunities);
+        } catch (Exception e) {
+            return new Response(true, e.getMessage(), null);
+        }
+    }
 }
