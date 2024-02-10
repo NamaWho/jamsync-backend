@@ -117,7 +117,7 @@ public class OpportunityController {
         }
     }
 
-    @GetMapping("/getTopLocationsForOpportunities")
+    @GetMapping("/topLocationsForOpportunities")
     public Response getTopLocationsForOpportunities(){
         try{
             List<Document> opportunities = this.opportunityService.getTopLocationsForOpportunities();

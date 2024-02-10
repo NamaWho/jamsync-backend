@@ -284,19 +284,15 @@ public class OpportunityDAO {
         return collection.aggregate(Arrays.asList(
                 // group the opportunities by the city, country
                 Aggregates.group(new Document("city", "$location.city")
-                                .append("country", "$location.country"),
-                        Accumulators.sum("opportunitiesForTheRegion", 1)),
+                                .append("country", "$location.country")
+                                .append("state", "$location.state"),
+                        Accumulators.sum("totalOpportunities", 1)),
                 // project the fields to be returned
                 Aggregates.project(Projections.fields(
-                        Projections.include("_id", "opportunitiesForTheRegion"),
-                        Projections.computed("location", new Document("$concat", Arrays.asList(
-                                new Document("$toString", "$_id.city"),
-                                new Document("$cond", Arrays.asList(new Document("$eq", Arrays.asList("$_id.state", null)), "", ", null")),
-                                new Document("$concat", Arrays.asList(", ", new Document("$toString", "$_id.country")))
-                        )))
+                        Projections.include("_id", "totalOpportunities")
                 )),
                 // sort the results by the count in descending order
-                Aggregates.sort(Sorts.descending("opportunitiesForTheRegion")),
+                Aggregates.sort(Sorts.descending("totalOpportunities")),
                 Aggregates.limit(10)
         )).into(new ArrayList<>());
     }
