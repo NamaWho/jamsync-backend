@@ -9,8 +9,7 @@ import com.lsmsdb.jamsync.routine.MongoTask;
 import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import com.mongodb.client.*;
-import com.mongodb.client.model.FindOneAndReplaceOptions;
-import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -18,13 +17,11 @@ import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Sorts;
+
 import java.util.Arrays;
 import java.util.List;
-import com.mongodb.client.model.Accumulators;
 import java.util.ArrayList;
-import com.mongodb.client.model.Filters;
+
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
 import org.neo4j.driver.types.Node;
@@ -263,7 +260,6 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
-
     public List<Opportunity> getSuggestedOpportunities(Musician m) throws DAOException {
         List<Opportunity> suggestedOpportunities = new ArrayList<>();
         List<String> musicianGenres = m.getGenres();

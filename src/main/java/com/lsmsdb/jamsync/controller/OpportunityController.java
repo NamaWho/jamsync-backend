@@ -116,4 +116,14 @@ public class OpportunityController {
             return new Response(true, e.getMessage(), null);
         }
     }
+
+    @GetMapping("/getTopLocationsForOpportunities")
+    public Response getTopLocationsForOpportunities(){
+        try{
+            List<Document> opportunities = this.opportunityService.getTopLocationsForOpportunities();
+            return new Response(false, null, opportunities);
+        } catch (Exception e){
+            return new Response(true, e.getMessage(), null);
+        }
+    }
 }
