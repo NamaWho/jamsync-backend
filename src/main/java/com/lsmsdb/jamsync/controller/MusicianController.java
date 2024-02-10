@@ -148,6 +148,22 @@ public class MusicianController {
             return new Response(true, ex.getMessage(), null);
         }
     }
+    @PostMapping("/recommendBandsToMusician")
+    public Response recommendBandsToMusician(@RequestBody Musician m) {
+        try {
+            return new Response(false, "", musicianService.suggestOpportunitiesByFollowers(m));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+    @PostMapping("/recommendMusiciansToMusician")
+    public Response recommendMusiciansToMusician(@RequestBody Musician m) {
+        try {
+            return new Response(false, "", musicianService.suggestOpportunitiesByFollowers(m));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
 }
 
 

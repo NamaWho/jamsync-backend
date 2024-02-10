@@ -277,6 +277,56 @@ class JamsyncApplicationTests {
 		}
 	}
 
+	@Test
+	public void testRecommendMusiciansToMusician() {
+		// Create a sample musician
+		// Create a mock Musician object for testing
+		Musician musician = new Musician();
+		musician.set_id("113ea8f4-7fc9-4ab8-b7d0-76930d81305e");
+
+		// Call the suggestOpportunitiesByFollowers method
+		try {
+			MusicianDAO obj = new MusicianDAO();
+			List<Document> documents = obj.recommendMusiciansToMusician(musician);
+
+			// Print out the size of the documents list
+			System.out.println("Number of documents returned: " + documents.size());
+
+			// Assert that the list of documents is not null
+			// You can add more specific assertions based on your expected output
+			assertEquals(false, documents.isEmpty());
+		} catch (DAOException e) {
+			// Handle any exceptions thrown during the test
+			e.printStackTrace();
+		}
+		// Additional assertions depending on the expected behavior and structure of the returned documents
+	}
+	@Test
+	public void testRecommendBandsToMusician() {
+		// Create a sample musician
+		// Create a mock Musician object for testing
+		Musician musician = new Musician();
+		musician.set_id("113ea8f4-7fc9-4ab8-b7d0-76930d81305e");
+
+		// Call the suggestOpportunitiesByFollowers method
+		try {
+			MusicianDAO obj = new MusicianDAO();
+			List<Document> documents = obj.recommendBandsToMusician(musician);
+
+			// Print out the size of the documents list
+			System.out.println("Number of documents returned: " + documents.size());
+
+			// Assert that the list of documents is not null
+			// You can add more specific assertions based on your expected output
+			assertEquals(false, documents.isEmpty());
+		} catch (DAOException e) {
+			// Handle any exceptions thrown during the test
+			e.printStackTrace();
+		}
+		// Additional assertions depending on the expected behavior and structure of the returned documents
+	}
 }
+
+
 
 

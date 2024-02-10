@@ -29,4 +29,6 @@ public interface MusicianService {
     List<Opportunity> getSuggestedOpportunities(Musician m) throws BusinessException;
 
     List<Document> suggestOpportunitiesByFollowers(Musician m) throws BusinessException;
+    List<Document> recommendBandsToMusician(Musician m) throws BusinessException;
+    List<Document> recommendMusiciansToMusician(Musician m) throws BusinessException;
 }

@@ -1,10 +1,7 @@
 package com.lsmsdb.jamsync.dao;
 
 import com.lsmsdb.jamsync.dao.exception.DAOException;
-import com.lsmsdb.jamsync.model.Credentials;
-import com.lsmsdb.jamsync.model.Location;
-import com.lsmsdb.jamsync.model.Musician;
-import com.lsmsdb.jamsync.model.Opportunity;
+import com.lsmsdb.jamsync.model.*;
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import com.lsmsdb.jamsync.repository.Neo4jDriver;
 import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
@@ -335,6 +332,59 @@ public class MusicianDAO {
                 List<Document> documents = new ArrayList<>();
                 for (Record record : records) {
                     Value value = record.get("o");
+                    if (value.type().name().equals("NODE")) {
+                        Node node = value.asNode();
+                        documents.add(new Document(node.asMap()));
+                    }
+                }
+                return documents;
+            });
+        } catch (Exception e) {
+            LogManager.getLogger(BandDAO.class).error("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+    }
+    public List<Document> recommendMusiciansToMusician(Musician musician)  throws DAOException {
+        String formattedQuery = "MATCH (m:Musician {_id:'%s'})-[:FOLLOWS]->(:Musician)-[:FOLLOWS]->(recommended:Musician)\n" +
+                "WHERE NOT (m)-[:FOLLOWS]->(recommended)\n" +
+                "RETURN recommended\n" +
+                "LIMIT 5";
+
+        String query = String.format(formattedQuery, musician.get_id());
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            String finalQuery = query;
+            return session.readTransaction(tx -> {
+                List<Record> records = tx.run(finalQuery).list();
+                List<Document> documents = new ArrayList<>();
+                for (Record record : records) {
+                    Value value = record.get("m");
+                    if (value.type().name().equals("NODE")) {
+                        Node node = value.asNode();
+                        documents.add(new Document(node.asMap()));
+                    }
+                }
+                return documents;
+            });
+        } catch (Exception e) {
+            LogManager.getLogger(BandDAO.class).error("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+    }
+    public List<Document> recommendBandsToMusician(Musician musician) throws DAOException {
+        String formattedQuery = "MATCH (m:Musician {_id:'%s'})-[:FOLLOWS]->(:Musician)-[:FOLLOWS]->(follower)-[:MEMBER_OF]->(recommended:Band)\n" +
+                "WHERE NOT (m)-[:MEMBER_OF]->(recommended)\n" +
+                "RETURN recommended\n" +
+                "LIMIT 5";
+
+        String query = String.format(formattedQuery, musician.get_id());
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            String finalQuery = query;
+            System.out.println(query);
+            return session.readTransaction(tx -> {
+                List<Record> records = tx.run(finalQuery).list();
+                List<Document> documents = new ArrayList<>();
+                for (Record record : records) {
+                    Value value = record.get("recommended");
                     if (value.type().name().equals("NODE")) {
                         Node node = value.asNode();
                         documents.add(new Document(node.asMap()));
