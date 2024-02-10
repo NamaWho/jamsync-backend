@@ -197,7 +197,7 @@ public class BandDAO {
     public boolean addMember(String bandId, String musicianId) throws DAOException {
         String query = null;
         String formattedQuery = "MATCH (b:Band {_id: %s}), (m:Musician {_id: %s})" +
-                "CREATE (m)-[:MEMBER_OF]->(b)";
+                "MERGE (m)-[:MEMBER_OF]->(b)";
         query = String.format(formattedQuery,
                 "\"" + bandId + "\"",
                 "\"" + musicianId + "\"");
