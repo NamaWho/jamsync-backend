@@ -239,4 +239,24 @@ public class OpportunityDAO {
                 Aggregates.sort(Sorts.ascending("_id"))
         )).into(new ArrayList<>());
     }
+
+    public List<Document> getTopGenres() throws DAOException {
+        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+
+        return collection.aggregate(Arrays.asList(
+                // unwind the genres array
+                Aggregates.unwind("$genres"),
+                // group the opportunities by genre
+                Aggregates.group("$genres", Accumulators.sum("count", 1)),
+                // sort the genres by count
+                Aggregates.sort(Sorts.descending("count")),
+                // project the fields to be returned
+                Aggregates.project(Projections.fields(
+                        Projections.include("_id", "count")
+                )),
+                // limit the results to the top 5 genres
+                Aggregates.limit(5)
+
+        )).into(new ArrayList<>());
+    }
 }

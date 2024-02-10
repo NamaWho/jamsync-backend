@@ -106,4 +106,14 @@ public class OpportunityController {
             return new Response(true, e.getMessage(), null);
         }
     }
+
+    @GetMapping("/topGenres")
+    public Response getTopGenres() {
+        try {
+            List<Document> genres = this.opportunityService.getTopGenres();
+            return new Response(false, null, genres);
+        } catch (Exception e) {
+            return new Response(true, e.getMessage(), null);
+        }
+    }
 }

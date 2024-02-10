@@ -21,4 +21,6 @@ public interface OpportunityService {
     List<Document> getTopAppliedOpportunities() throws BusinessException;
 
     List<Document> getOpportunitiesByAgeRange() throws BusinessException;
+
+    List<Document> getTopGenres() throws BusinessException;
 }
