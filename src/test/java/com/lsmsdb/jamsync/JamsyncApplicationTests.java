@@ -281,13 +281,12 @@ class JamsyncApplicationTests {
 	public void testRecommendMusiciansToMusician() {
 		// Create a sample musician
 		// Create a mock Musician object for testing
-		Musician musician = new Musician();
-		musician.set_id("113ea8f4-7fc9-4ab8-b7d0-76930d81305e");
+		String id = "113ea8f4-7fc9-4ab8-b7d0-76930d81305e";
 
 		// Call the suggestOpportunitiesByFollowers method
 		try {
 			MusicianDAO obj = new MusicianDAO();
-			List<Document> documents = obj.recommendMusiciansToMusician(musician);
+			List<Document> documents = obj.getSuggestedMusiciansByNetwork(id);
 
 			// Print out the size of the documents list
 			System.out.println("Number of documents returned: " + documents.size());
@@ -305,13 +304,12 @@ class JamsyncApplicationTests {
 	public void testRecommendBandsToMusician() {
 		// Create a sample musician
 		// Create a mock Musician object for testing
-		Musician musician = new Musician();
-		musician.set_id("113ea8f4-7fc9-4ab8-b7d0-76930d81305e");
+		String id = "113ea8f4-7fc9-4ab8-b7d0-76930d81305e";
 
 		// Call the suggestOpportunitiesByFollowers method
 		try {
 			MusicianDAO obj = new MusicianDAO();
-			List<Document> documents = obj.recommendBandsToMusician(musician);
+			List<Document> documents = obj.getSuggestedBandsByNetwork(id);
 
 			// Print out the size of the documents list
 			System.out.println("Number of documents returned: " + documents.size());

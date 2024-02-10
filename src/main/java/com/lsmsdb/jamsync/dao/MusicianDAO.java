@@ -340,25 +340,27 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
-    public List<Document> recommendMusiciansToMusician(Musician musician)  throws DAOException {
+    public List<Document> getSuggestedMusiciansByNetwork(String id)  throws DAOException {
         String formattedQuery = "MATCH (m:Musician {_id:'%s'})-[:FOLLOWS]->(:Musician)-[:FOLLOWS]->(recommended:Musician)\n" +
                 "WHERE NOT (m)-[:FOLLOWS]->(recommended)\n" +
                 "RETURN recommended\n" +
-                "LIMIT 5";
+                "LIMIT 12";
 
-        String query = String.format(formattedQuery, musician.get_id());
+        String query = String.format(formattedQuery, id);
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             String finalQuery = query;
             return session.readTransaction(tx -> {
                 List<Record> records = tx.run(finalQuery).list();
                 List<Document> documents = new ArrayList<>();
                 for (Record record : records) {
-                    Value value = record.get("m");
+                    LogManager.getLogger(BandDAO.class).info("Record: " + record);
+                    Value value = record.get("recommended");
                     if (value.type().name().equals("NODE")) {
                         Node node = value.asNode();
                         documents.add(new Document(node.asMap()));
                     }
                 }
+                LogManager.getLogger(BandDAO.class).info("Documents: " + documents);
                 return documents;
             });
         } catch (Exception e) {
@@ -366,13 +368,13 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
-    public List<Document> recommendBandsToMusician(Musician musician) throws DAOException {
+    public List<Document> getSuggestedBandsByNetwork(String id) throws DAOException {
         String formattedQuery = "MATCH (m:Musician {_id:'%s'})-[:FOLLOWS]->(:Musician)-[:FOLLOWS]->(follower)-[:MEMBER_OF]->(recommended:Band)\n" +
                 "WHERE NOT (m)-[:MEMBER_OF]->(recommended)\n" +
                 "RETURN recommended\n" +
-                "LIMIT 5";
+                "LIMIT 12";
 
-        String query = String.format(formattedQuery, musician.get_id());
+        String query = String.format(formattedQuery, id);
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             String finalQuery = query;
             System.out.println(query);
@@ -393,4 +395,40 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
+
+    /*public List<Document> suggestOpportunitiesByNetworkAndSimilarities(Musician m) throws DAOException {
+        String formattedQuery = "" +
+                "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(mb:Musician)\n" +
+                "WITH m, mb\n" +
+                "MATCH (mb)-[:APPLIED_FOR]->(o:Opportunity)\n" +
+                "WHERE any(i in m.instruments WHERE i in o.instruments) OR any(g in m.genres WHERE g in o.genres)\n" +
+                "RETURN o\n" +
+                "UNION\n" +
+                "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(b:Band)\n" +
+                "WITH m, b\n" +
+                "MATCH (b)-[:PUBLISHED]->(o:Opportunity)\n" +
+                "WHERE any(i in m.instruments WHERE i in o.instruments) OR any(g in m.genres WHERE g in o.genres)\n" +
+                "RETURN o\n" +
+                "LIMIT 10";
+
+        String query = String.format(formattedQuery, m.get_id());
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            String finalQuery = query;
+            return session.readTransaction(tx -> {
+                List<Record> records = tx.run(finalQuery).list();
+                List<Document> documents = new ArrayList<>();
+                for (Record record : records) {
+                    Value value = record.get("o");
+                    if (value.type().name().equals("NODE")) {
+                        Node node = value.asNode();
+                        documents.add(new Document(node.asMap()));
+                    }
+                }
+                return documents;
+            });
+        } catch (Exception e) {
+            LogManager.getLogger(BandDAO.class).error("Exception: " + e.getMessage());
+            throw new DAOException(e.getMessage());
+        }
+    }*/
 }

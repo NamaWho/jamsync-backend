@@ -11,20 +11,26 @@ import com.lsmsdb.jamsync.service.utils.JwtUtil;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Position;
 import lombok.extern.java.Log;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 
+
 import com.lsmsdb.jamsync.repository.MongoDriver;
 import org.bson.conversions.Bson;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.*;
 
 public class AuthDAO {
 
@@ -46,23 +52,25 @@ public class AuthDAO {
                 throw new IllegalArgumentException("Invalid type");
         }
 
-        LogManager.getLogger(this.getClass()).info("type: " + type);
+        /*try(MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(collectionType).find(eq("credentials.user", user)).iterator()){
+            if(cursor.hasNext()){*/
+        try {
+                MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(collectionType);
+                Bson filter = eq("credentials.user", user);
+                Bson update = set("lastLoginDateTime", LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                Document document = collection.findOneAndUpdate(filter, update, new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+                //Document doc = cursor.next();
 
-        try(MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(collectionType).find(eq("credentials.user", user)).iterator()){
-            if(cursor.hasNext()){
-                Document doc = cursor.next();
-                LogManager.getLogger(this.getClass()).info("doc: " + doc.toJson());
-
-                boolean isBanned = doc.getBoolean("isBanned");
-                LogManager.getLogger(this.getClass()).info("isBanned: " + isBanned);
+            if (document != null) {
+                boolean isBanned = document.getBoolean("isBanned");
                 if(isBanned)
                     return null;
 
-                String hashedPassword = new Credentials((Document) doc.get("credentials")).getPassword();
+                String hashedPassword = new Credentials((Document) document.get("credentials")).getPassword();
                 String hashedInputPassword = HashUtil.hashPassword(password);
 
                 if(hashedPassword.equals(hashedInputPassword))
-                    return JwtUtil.generateToken(user, type, doc);
+                    return JwtUtil.generateToken(user, type, document);
                 else
                     return null;
             }

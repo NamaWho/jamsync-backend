@@ -26,23 +26,22 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.inc;
 
 public class OpportunityDAO {
 
     public Opportunity getOpportunityById(String id) throws DAOException{
-        MongoCursor<Document> cursor = null;
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
-            cursor = collection.find(eq("_id", id)).iterator();
-            if(cursor.hasNext()) {
-                Document document = cursor.next();
+            Bson filter = eq("_id", id);
+            Bson update = inc("visits", 1);
+            Document document = collection.findOneAndUpdate(filter, update, new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
+            if(document != null) {
                 return new Opportunity(document);
             }
         } catch(Exception ex) {
             LogManager.getLogger("OpportunityDAO.class").error(ex.getMessage());
             throw new DAOException(ex);
-        } finally {
-            if(cursor != null) cursor.close();
         }
         return null;
     }
@@ -256,7 +255,6 @@ public class OpportunityDAO {
                 )),
                 // limit the results to the top 5 genres
                 Aggregates.limit(5)
-
         )).into(new ArrayList<>());
     }
 //    public List<Document> getTopLocationsForOpportunities() throws DAOException {

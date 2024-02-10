@@ -102,20 +102,29 @@ public class MusicianServiceImpl implements MusicianService {
         }
     }
     @Override
-    public List<Document> recommendBandsToMusician(Musician m) throws BusinessException {
+    public List<Document> getSuggestedBandsByNetwork(String id) throws BusinessException {
         try {
-            return musicianDAO.suggestOpportunitiesByFollowers(m);
+            return musicianDAO.getSuggestedBandsByNetwork(id);
         } catch (DAOException ex) {
             throw new BusinessException(ex);
         }
     }
     @Override
-    public List<Document> recommendMusiciansToMusician(Musician m) throws BusinessException {
+    public List<Document> getSuggestedMusiciansByNetwork(String id) throws BusinessException {
         try {
-            return musicianDAO.suggestOpportunitiesByFollowers(m);
+            return musicianDAO.getSuggestedMusiciansByNetwork(id);
         } catch (DAOException ex) {
             throw new BusinessException(ex);
         }
     }
+
+    /*@Override
+    public List<Document> suggestOpportunitiesByNetworkAndSimilarities(Musician m) throws BusinessException {
+        try {
+            return musicianDAO.suggestOpportunitiesByNetworkAndSimilarities(m);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }*/
 
 }

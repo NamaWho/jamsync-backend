@@ -148,22 +148,31 @@ public class MusicianController {
             return new Response(true, ex.getMessage(), null);
         }
     }
-    @PostMapping("/recommendBandsToMusician")
-    public Response recommendBandsToMusician(@RequestBody Musician m) {
+    @PostMapping("/suggestedBandsByNetwork")
+    public Response getSuggestedBandsByNetwork(@RequestBody String id) {
         try {
-            return new Response(false, "", musicianService.suggestOpportunitiesByFollowers(m));
+            return new Response(false, "", musicianService.getSuggestedBandsByNetwork(id));
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
     }
-    @PostMapping("/recommendMusiciansToMusician")
-    public Response recommendMusiciansToMusician(@RequestBody Musician m) {
+    @PostMapping("/suggestedMusiciansByNetwork")
+    public Response getSuggestedMusiciansByNetwork(@RequestBody String id) {
         try {
-            return new Response(false, "", musicianService.suggestOpportunitiesByFollowers(m));
+            return new Response(false, "", musicianService.getSuggestedMusiciansByNetwork(id));
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
     }
+
+   /* @PostMapping("/suggestedOpportunitiesByNetworkAndSimilarities")
+    public Response suggestOpportunitiesByNetworkAndSimilarities(@RequestBody Musician m) {
+        try {
+            return new Response(false, "", musicianService.suggestOpportunitiesByNetworkAndSimilarities(m));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }*/
 }
 
 
