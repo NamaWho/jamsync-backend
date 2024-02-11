@@ -2,6 +2,7 @@ package com.lsmsdb.jamsync.routine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -32,8 +33,8 @@ public class MongoUpdater {
     private static final MongoUpdater updater = new MongoUpdater();
     private final static OpportunityDAO opportunityDAO = new OpportunityDAO();
     //private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private List<MongoTask> updateTasks = new ArrayList<MongoTask>();
-    private List<MongoTask> failedTasks = new ArrayList<MongoTask>();
+    private static ConcurrentLinkedQueue<MongoTask> updateTasks = new ConcurrentLinkedQueue<>();
+    private static ConcurrentLinkedQueue<MongoTask> failedTasks = new ConcurrentLinkedQueue<>();
 
     private MongoUpdater() {
         LogManager.getLogger("MongoUpdater").info("MongoUpdater constructor called...");
@@ -48,10 +49,7 @@ public class MongoUpdater {
     }
 
     private MongoTask popTask() {
-        if (updateTasks.isEmpty()) {
-            return null;
-        }
-        return updateTasks.remove(0);
+        return updateTasks.poll();
     }
 
     private void retryFailedTasks() {
@@ -65,7 +63,6 @@ public class MongoUpdater {
     private void updateMongoData() {
         LogManager.getLogger("MongoUpdater").info("updateMongoData routine started...");
         retryFailedTasks();
-
         MongoTask mongoTask = popTask();
         while (mongoTask != null) {
             switch (mongoTask.getOperation()) {
