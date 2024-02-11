@@ -24,8 +24,7 @@ import org.neo4j.driver.exceptions.TransactionTerminatedException;
 import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.TypeSystem;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import java.time.LocalDate;
 
@@ -34,7 +33,6 @@ import static com.mongodb.client.model.Filters.eq;
 
 import com.mongodb.client.AggregateIterable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BandDAO {
@@ -44,6 +42,9 @@ public class BandDAO {
         // hash the password
         String digest = hashPassword(band.getCredentials().getPassword());
         band.getCredentials().setPassword(digest);
+
+        String uniqueId = UUID.randomUUID().toString();
+        band.set_id(uniqueId);
 
         // 1. Create a new band in MongoDB
         try {

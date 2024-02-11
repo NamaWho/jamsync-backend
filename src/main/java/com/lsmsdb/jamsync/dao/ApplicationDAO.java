@@ -20,6 +20,7 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -58,7 +59,6 @@ public class ApplicationDAO {
 
     public Application createApplication(String opportunityId, Application application) throws DAOException {
         try {
-
             // 0. Check if the opportunity has reached the maximum number of applications
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
             // count the number of applications
@@ -70,6 +70,8 @@ public class ApplicationDAO {
             }
 
             // 1. Add application to opportunity
+            String uniqueId = UUID.randomUUID().toString();
+            application.set_id(uniqueId);
             //MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
             Document applicationDocument = application.toDocument();
             Document updatedDocument = collection.findOneAndUpdate(

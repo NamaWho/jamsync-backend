@@ -24,10 +24,7 @@ import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
@@ -66,6 +63,8 @@ public class OpportunityDAO {
         }
 
         // 1. Create a new opportunity in MongoDB
+        String uniqueID = UUID.randomUUID().toString();
+        opportunity.set_id(uniqueID);
         MongoCursor<Document> cursor = null;
         Document document = null;
         try {

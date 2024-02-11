@@ -28,6 +28,7 @@ import org.neo4j.driver.types.Node;
 
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 import static com.lsmsdb.jamsync.dao.utils.HashUtil.hashPassword;
@@ -40,6 +41,9 @@ public class MusicianDAO {
         // hash the password
         String digest = hashPassword(musician.getCredentials().getPassword());
         musician.getCredentials().setPassword(digest);
+
+        String uniqueId = UUID.randomUUID().toString();
+        musician.set_id(uniqueId);
 
         // 1. Create a new musician in MongoDB
         try {
