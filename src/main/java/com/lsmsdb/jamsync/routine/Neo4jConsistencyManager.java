@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,7 @@ public class Neo4jConsistencyManager {
 
     private static final Neo4jConsistencyManager manager = new Neo4jConsistencyManager();
     //private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private List<String> operations = new ArrayList<>();
+    private static ConcurrentLinkedQueue<String> operations = new ConcurrentLinkedQueue<>();
 
     // retrieve Driver from Neo4jDriver class in repository package
 
@@ -35,12 +36,7 @@ public class Neo4jConsistencyManager {
     }
 
     private String popOperation() {
-        if (!operations.isEmpty()) {
-            String operation = operations.get(0);
-            operations.remove(0);
-            return operation;
-        }
-        return null;
+        return operations.poll();
     }
 
     @Scheduled(cron = "0 0/5 * * * ?") // this runs the task every 5 minutes
@@ -59,7 +55,9 @@ public class Neo4jConsistencyManager {
             }
             operation = popOperation();
         }
-        operations = failedOperations;
+        for (String op : failedOperations) {
+            operations.add(op);
+        }
     }
 
     public void shutdown() {
