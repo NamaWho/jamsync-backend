@@ -58,8 +58,19 @@ public class ApplicationDAO {
 
     public Application createApplication(String opportunityId, Application application) throws DAOException {
         try {
-            // 1. Add application to opportunity
+
+            // 0. Check if the opportunity has reached the maximum number of applications
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+            // count the number of applications
+            Document opportunityDocument = collection.find(eq("_id", opportunityId)).first();
+            List<Document> applications = opportunityDocument.getList("applications", Document.class);
+            int count = applications.size();
+            if (count >= 25) {
+                throw new DAOException("Applications limit reached");
+            }
+
+            // 1. Add application to opportunity
+            //MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
             Document applicationDocument = application.toDocument();
             Document updatedDocument = collection.findOneAndUpdate(
                     new Document("_id", opportunityId),

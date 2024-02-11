@@ -54,6 +54,17 @@ public class OpportunityDAO {
     }
 
     public Opportunity createOpportunity(Opportunity opportunity) throws DAOException{
+        // 0. Check if the user has already created 10 opportunities
+        try {
+            MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+            long count = collection.countDocuments(eq("publisher._id", opportunity.getPublisher().getString("_id")));
+            if (count >= 10) {
+                throw new DAOException("User has already created 10 opportunities");
+            }
+        } catch (Exception ex) {
+            throw new DAOException(ex);
+        }
+
         // 1. Create a new opportunity in MongoDB
         MongoCursor<Document> cursor = null;
         Document document = null;
