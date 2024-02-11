@@ -22,22 +22,23 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.WriteModel;
 import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@Component
 public class MongoUpdater {
     private static final MongoUpdater updater = new MongoUpdater();
-    private final static MusicianDAO musicianDAO = new MusicianDAO();
-    private final static BandDAO bandDAO = new BandDAO();
     private final static OpportunityDAO opportunityDAO = new OpportunityDAO();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    //private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private List<MongoTask> updateTasks = new ArrayList<MongoTask>();
     private List<MongoTask> failedTasks = new ArrayList<MongoTask>();
 
     private MongoUpdater() {
         LogManager.getLogger("MongoUpdater").info("MongoUpdater constructor called...");
         // Schedule the updater to run every 2 minutes
-        scheduler.scheduleAtFixedRate(this::updateMongoData, 0, 1, TimeUnit.MINUTES);
+        //scheduler.scheduleAtFixedRate(this::updateMongoData, 0, 1, TimeUnit.MINUTES);
     }
 
     public static MongoUpdater getInstance() { return updater; }
@@ -60,6 +61,7 @@ public class MongoUpdater {
         failedTasks.clear();
     }
 
+    @Scheduled(cron = "0 0/1 * * * ?") // this runs the task every minute
     private void updateMongoData() {
         LogManager.getLogger("MongoUpdater").info("updateMongoData routine started...");
         retryFailedTasks();
@@ -411,6 +413,6 @@ public class MongoUpdater {
     }
 
     public void shutdown() {
-        scheduler.shutdown();
+        //scheduler.shutdown();
     }
 }
