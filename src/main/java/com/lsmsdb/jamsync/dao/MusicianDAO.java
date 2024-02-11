@@ -64,10 +64,10 @@ public class MusicianDAO {
             });
         } catch (TransactionTerminatedException e) {
             // Add this task to a queue to be executed later from the Neo4jConsistencyManager
-            System.out.println("Transaction terminated. Adding task to queue...");
+            LogManager.getLogger("MusicianDAO").warn("Transaction terminated. Adding task to queue...");
             Neo4jConsistencyManager.getInstance().pushOperation(query);
         } catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
+            LogManager.getLogger("MusicianDAO").error("Exception: " + e.getMessage());
             throw new DAOException(e.getMessage());
         }
     }
@@ -226,7 +226,6 @@ public class MusicianDAO {
             session.executeWrite(tx -> {
                 // Check if the relationship already exists
                 String checkQuery = String.format("MATCH (follower:Musician {_id: $followerId})-[r:FOLLOWS]->(u:%s {_id: $followedId}) RETURN r", type);
-                LogManager.getLogger("DAO").info(checkQuery);
                 Result checkResult = tx.run(checkQuery, Values.parameters("followerId", id, "followedId", followedId));
                 if (checkResult.hasNext()) {
                     throw new RuntimeException("The musician is already following this user.");
@@ -234,7 +233,6 @@ public class MusicianDAO {
 
                 String query = String.format("MATCH (follower:Musician {_id: $followerId}), (followed:%s {_id: $followedId}) " +
                         "CREATE (follower)-[:FOLLOWS]->(followed)", type);
-                LogManager.getLogger("DAO").info("Running follow query: {}", query);
                 tx.run(query, Values.parameters("followerId", id, "followedId", followedId));
                 return 0;
             });
@@ -301,7 +299,6 @@ public class MusicianDAO {
         }
 
         Bson query = Filters.and(filters);
-        LogManager.getLogger(BandDAO.class).info("Filters: " + query);
 
         MongoCursor<Document> cursor = collection.find(query).limit(10).iterator();
         while (cursor.hasNext()) {
@@ -313,6 +310,7 @@ public class MusicianDAO {
 
         return suggestedOpportunities;
     }
+
     public List<Document> suggestOpportunitiesByFollowers(Musician musician) throws DAOException {
         String formattedQuery = "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(b:Band)-[:PUBLISHED]->(o:Opportunity)\n" +
                 "RETURN o LIMIT 5 UNION\n" +
@@ -340,6 +338,51 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
+
+    public List<Musician> getSuggestedMusiciansBySimilarities(Musician m) throws DAOException{
+        List<Musician> suggestedMusicians = new ArrayList<>();
+        List<String> musicianGenres = m.getGenres();
+        List<String> musicianInstruments = m.getInstruments();
+        Location musicianLocation = m.getLocation();
+        String musicianCountry = musicianLocation.getCountry();
+        Integer maxDistance = 150;
+
+        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.MUSICIAN);
+
+        Bson exludeMusicianFilter = Filters.ne("_id", m.get_id());
+        Bson musicianCountryFilter = Filters.or(
+                Filters.eq("location.state", musicianCountry),
+                Filters.eq("location.country", musicianCountry));
+        Bson genresinstrumentsFilter = Filters.or(
+                Filters.in("genres", musicianGenres),
+                Filters.in("instruments", musicianInstruments)
+        );
+
+        List<Bson> filters = new ArrayList<>();
+        filters.add(exludeMusicianFilter);
+        filters.add(musicianCountryFilter);
+        filters.add(genresinstrumentsFilter);
+
+        if (musicianLocation != null && !musicianLocation.getCity().isEmpty()) {
+            Point musicianPoint = new Point(new Position(musicianLocation.getGeojson().getCoordinates().get(0),
+                    musicianLocation.getGeojson().getCoordinates().get(1)));
+            Bson geoNearFilter = Filters.near("location.geojson", musicianPoint, maxDistance.doubleValue() * 1000, null);
+            filters.add(geoNearFilter);
+        }
+
+        Bson query = Filters.and(filters);
+
+        MongoCursor<Document> cursor = collection.find(query).limit(10).iterator();
+        while (cursor.hasNext()) {
+            Document musicianDoc = cursor.next();
+            Musician musician = new Musician(musicianDoc);
+            suggestedMusicians.add(musician);
+        }
+        cursor.close();
+
+        return suggestedMusicians;
+    }
+
     public List<Document> getSuggestedMusiciansByNetwork(String id)  throws DAOException {
         String formattedQuery = "MATCH (m:Musician {_id:'%s'})-[:FOLLOWS]->(:Musician)-[:FOLLOWS]->(recommended:Musician)\n" +
                 "WHERE NOT (m)-[:FOLLOWS]->(recommended)\n" +
@@ -353,14 +396,12 @@ public class MusicianDAO {
                 List<Record> records = tx.run(finalQuery).list();
                 List<Document> documents = new ArrayList<>();
                 for (Record record : records) {
-                    LogManager.getLogger(BandDAO.class).info("Record: " + record);
                     Value value = record.get("recommended");
                     if (value.type().name().equals("NODE")) {
                         Node node = value.asNode();
                         documents.add(new Document(node.asMap()));
                     }
                 }
-                LogManager.getLogger(BandDAO.class).info("Documents: " + documents);
                 return documents;
             });
         } catch (Exception e) {
@@ -368,6 +409,47 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
+
+    public List<Band> getSuggestedBandsBySimilarities(Musician m) throws DAOException{
+        List<Band> suggestedBands = new ArrayList<>();
+        List<String> musicianGenres = m.getGenres();
+        Location musicianLocation = m.getLocation();
+        String musicianCountry = musicianLocation.getCountry();
+        Integer maxDistance = 150;
+
+        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.BAND);
+
+        Bson exludeBandFilter = Filters.ne("_id", m.get_id());
+        Bson bandCountryFilter = Filters.or(
+                Filters.eq("location.state", musicianCountry),
+                Filters.eq("location.country", musicianCountry));
+        Bson genresFilter = Filters.in("genres", musicianGenres);
+
+        List<Bson> filters = new ArrayList<>();
+        filters.add(exludeBandFilter);
+        filters.add(bandCountryFilter);
+        filters.add(genresFilter);
+
+        if (musicianLocation != null && !musicianLocation.getCity().isEmpty()) {
+            Point bandPoint = new Point(new Position(musicianLocation.getGeojson().getCoordinates().get(0),
+                    musicianLocation.getGeojson().getCoordinates().get(1)));
+            Bson geoNearFilter = Filters.near("location.geojson", bandPoint, maxDistance.doubleValue() * 1000, null);
+            filters.add(geoNearFilter);
+        }
+
+        Bson query = Filters.and(filters);
+
+        MongoCursor<Document> cursor = collection.find(query).limit(10).iterator();
+        while (cursor.hasNext()) {
+            Document bandDoc = cursor.next();
+            Band band = new Band(bandDoc);
+            suggestedBands.add(band);
+        }
+        cursor.close();
+
+        return suggestedBands;
+    }
+
     public List<Document> getSuggestedBandsByNetwork(String id) throws DAOException {
         String formattedQuery = "MATCH (m:Musician {_id:'%s'})-[:FOLLOWS]->(:Musician)-[:FOLLOWS]->(follower)-[:MEMBER_OF]->(recommended:Band)\n" +
                 "WHERE NOT (m)-[:MEMBER_OF]->(recommended)\n" +
@@ -377,7 +459,6 @@ public class MusicianDAO {
         String query = String.format(formattedQuery, id);
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             String finalQuery = query;
-            System.out.println(query);
             return session.readTransaction(tx -> {
                 List<Record> records = tx.run(finalQuery).list();
                 List<Document> documents = new ArrayList<>();
@@ -395,40 +476,4 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
-
-    /*public List<Document> suggestOpportunitiesByNetworkAndSimilarities(Musician m) throws DAOException {
-        String formattedQuery = "" +
-                "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(mb:Musician)\n" +
-                "WITH m, mb\n" +
-                "MATCH (mb)-[:APPLIED_FOR]->(o:Opportunity)\n" +
-                "WHERE any(i in m.instruments WHERE i in o.instruments) OR any(g in m.genres WHERE g in o.genres)\n" +
-                "RETURN o\n" +
-                "UNION\n" +
-                "MATCH (m:Musician {_id: '%s'})-[:FOLLOWS]->(b:Band)\n" +
-                "WITH m, b\n" +
-                "MATCH (b)-[:PUBLISHED]->(o:Opportunity)\n" +
-                "WHERE any(i in m.instruments WHERE i in o.instruments) OR any(g in m.genres WHERE g in o.genres)\n" +
-                "RETURN o\n" +
-                "LIMIT 10";
-
-        String query = String.format(formattedQuery, m.get_id());
-        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
-            String finalQuery = query;
-            return session.readTransaction(tx -> {
-                List<Record> records = tx.run(finalQuery).list();
-                List<Document> documents = new ArrayList<>();
-                for (Record record : records) {
-                    Value value = record.get("o");
-                    if (value.type().name().equals("NODE")) {
-                        Node node = value.asNode();
-                        documents.add(new Document(node.asMap()));
-                    }
-                }
-                return documents;
-            });
-        } catch (Exception e) {
-            LogManager.getLogger(BandDAO.class).error("Exception: " + e.getMessage());
-            throw new DAOException(e.getMessage());
-        }
-    }*/
 }

@@ -320,7 +320,4 @@ public class BandDAO {
         return suggestedOpportunities;
     }
 
-    public List<Document> getTopUsersByApplications() {
-        return null;
-    }
 }

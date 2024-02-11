@@ -1,5 +1,6 @@
 package com.lsmsdb.jamsync.service;
 
+import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.service.exception.BusinessException;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.model.Opportunity;
@@ -33,4 +34,8 @@ public interface MusicianService {
     /*List<Document> suggestOpportunitiesByNetworkAndSimilarities(Musician m) throws BusinessException;*/
     List<Document> getSuggestedBandsByNetwork(String id) throws BusinessException;
     List<Document> getSuggestedMusiciansByNetwork(String id) throws BusinessException;
+
+    List<Musician> getSuggestedMusiciansBySimilarities(Musician m) throws BusinessException;
+
+    List<Band> getSuggestedBandsBySimilarities(Musician m) throws BusinessException;
 }

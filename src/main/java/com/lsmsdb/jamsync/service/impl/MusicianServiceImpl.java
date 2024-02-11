@@ -1,6 +1,7 @@
 package com.lsmsdb.jamsync.service.impl;
 
 import com.lsmsdb.jamsync.dao.MusicianDAO;
+import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.model.Opportunity;
 import com.lsmsdb.jamsync.service.MusicianService;
 import com.lsmsdb.jamsync.model.Musician;
@@ -102,6 +103,15 @@ public class MusicianServiceImpl implements MusicianService {
         }
     }
     @Override
+    public List<Band> getSuggestedBandsBySimilarities(Musician m) throws BusinessException {
+        try {
+            return musicianDAO.getSuggestedBandsBySimilarities(m);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
+    @Override
     public List<Document> getSuggestedBandsByNetwork(String id) throws BusinessException {
         try {
             return musicianDAO.getSuggestedBandsByNetwork(id);
@@ -109,6 +119,16 @@ public class MusicianServiceImpl implements MusicianService {
             throw new BusinessException(ex);
         }
     }
+
+    @Override
+    public List<Musician> getSuggestedMusiciansBySimilarities(Musician m) throws BusinessException {
+        try {
+            return musicianDAO.getSuggestedMusiciansBySimilarities(m);
+        } catch (DAOException ex) {
+            throw new BusinessException(ex);
+        }
+    }
+
     @Override
     public List<Document> getSuggestedMusiciansByNetwork(String id) throws BusinessException {
         try {

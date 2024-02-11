@@ -1,6 +1,7 @@
 package com.lsmsdb.jamsync.controller;
 
 import com.lsmsdb.jamsync.controller.response.Response;
+import com.lsmsdb.jamsync.model.Band;
 import com.lsmsdb.jamsync.model.Musician;
 import com.lsmsdb.jamsync.service.RegisteredUserService;
 import com.lsmsdb.jamsync.service.factory.MusicianServiceFactory;
@@ -148,10 +149,29 @@ public class MusicianController {
             return new Response(true, ex.getMessage(), null);
         }
     }
+
+    @PostMapping("/suggestedBandsBySimilarities")
+    public Response getSuggestedBandsBySimilarities(@RequestBody Musician m) {
+        try {
+            return new Response(false, "", musicianService.getSuggestedBandsBySimilarities(m));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
     @PostMapping("/suggestedBandsByNetwork")
     public Response getSuggestedBandsByNetwork(@RequestBody String id) {
         try {
             return new Response(false, "", musicianService.getSuggestedBandsByNetwork(id));
+        } catch (BusinessException ex) {
+            return new Response(true, ex.getMessage(), null);
+        }
+    }
+
+    @PostMapping("/suggestedMusiciansBySimilarities")
+    public Response getSuggestedMusiciansBySimilarities(@RequestBody Musician m) {
+        try {
+            return new Response(false, "", musicianService.getSuggestedMusiciansBySimilarities(m));
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }

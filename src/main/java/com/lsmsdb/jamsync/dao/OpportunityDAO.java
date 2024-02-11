@@ -264,28 +264,7 @@ public class OpportunityDAO {
                 Aggregates.limit(5)
         )).into(new ArrayList<>());
     }
-//    public List<Document> getTopLocationsForOpportunities() throws DAOException {
-//        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
-//        return collection.aggregate(Arrays.asList(
-//                // group the opportunities by the city, country and state
-//                Aggregates.group(new Document("city", "$location.city")
-//                                .append("country", "$location.country"),
-//                        Accumulators.sum("count", 1)),
-//                // project the fields to be returned
-//                Aggregates.project(Projections.fields(
-//                        Projections.include("_id", "count"),
-//                        Projections.computed("location", new Document("$concat", Arrays.asList(
-//                                new Document("$toString", "$_id.city"),
-//                                new Document("$concat", Arrays.asList(", ", new Document("$toString", "$_id.state"))),
-//                                new Document("$concat", Arrays.asList(", ", new Document("$toString", "$_id.country")))
-//                        )))
-//                )),
-//                // sort the results by the count in descending order
-//                Aggregates.sort(Sorts.descending("count")),
-//                // limit the results to 10 cities
-//                Aggregates.limit(10)
-//        )).into(new ArrayList<>());
-//    }
+
     public List<Document> getTopLocationsForOpportunities() throws DAOException {
         MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
         return collection.aggregate(Arrays.asList(

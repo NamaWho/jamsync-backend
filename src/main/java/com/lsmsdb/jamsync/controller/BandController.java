@@ -154,13 +154,4 @@ public class BandController {
             return new Response(true, ex.getMessage(), null);
         }
     }
-
-    @GetMapping("/topBands")
-    public Response getTopUsersByApplications(){
-        try {
-            return new Response(false, "", bandService.getTopUsersByApplications());
-        } catch (BusinessException e) {
-            return new Response(true, e.getMessage(),null);
-        }
-    }
 }

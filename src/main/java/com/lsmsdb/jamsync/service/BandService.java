@@ -17,6 +17,5 @@ public interface BandService {
 
     boolean removeMember(String id, String memberId) throws BusinessException;
     List<Document> getMembers(String id) throws BusinessException;
-    List<Document> getTopUsersByApplications() throws BusinessException;
     List<Opportunity> getSuggestedOpportunities(Band b) throws BusinessException;
 }

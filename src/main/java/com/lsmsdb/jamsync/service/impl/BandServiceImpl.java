@@ -84,8 +84,4 @@ public class BandServiceImpl implements BandService {
             throw new BusinessException(ex);
         }
     }
-    @Override
-    public List<Document> getTopUsersByApplications() throws BusinessException{
-        return bandDAO.getTopUsersByApplications();
-    }
 }

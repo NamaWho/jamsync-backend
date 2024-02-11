@@ -132,5 +132,4 @@ public class RegisteredUserDAO {
             throw new DAOException("Error while getting followers count");
         }
     }
-
 }
