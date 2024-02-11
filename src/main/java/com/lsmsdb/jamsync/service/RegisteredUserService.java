@@ -12,6 +12,4 @@ public interface RegisteredUserService {
     List<RegisteredUser> searchUser(String type, String username, List<String> genres, List<String> instruments, Location location, Integer maxDistance, Integer minAge, Integer maxAge, String gender, Integer page, Integer pageSize) throws BusinessException;
 
     public Integer getFollowersCount(String _id, String type) throws BusinessException;
-
-    List<Document> getTopPublishers() throws BusinessException;
 }

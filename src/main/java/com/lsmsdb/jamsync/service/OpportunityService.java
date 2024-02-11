@@ -24,4 +24,6 @@ public interface OpportunityService {
 
     List<Document> getTopGenres() throws BusinessException;
     List<Document> getTopLocationsForOpportunities() throws BusinessException;
+
+    List<Document> getTopPublishers() throws BusinessException;
 }

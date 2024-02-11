@@ -133,22 +133,4 @@ public class RegisteredUserDAO {
         }
     }
 
-    public List<Document> getTopPublishers() throws DAOException {
-        LogManager.getLogger("MusicianDAO").info("Getting top publishers by applications");
-        /*MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
-        return collection.aggregate(Arrays.asList(
-                Aggregates.group("$publisher._id",
-                        Accumulators.first("username", "$publisher.username"),
-                        Accumulators.first("profilePictureUrl", "$publisher.profilePictureUrl"),
-                        Accumulators.sum("totalOpportunities", 1),
-                        Accumulators.sum("totalApplications", new Document("$size", "$applications")),
-                        Accumulators.sum("acceptedApplications", new Document("$sum", new Document("$cond", Arrays.asList(new Document("$eq", Arrays.asList("$this.status", 1)), 1, 0))))
-                ),
-                new Document("$addFields", new Document("acceptanceRate", new Document("$cond", Arrays.asList(new Document("$eq", Arrays.asList("$totalApplications", 0)), 0, new Document("$divide", Arrays.asList("$acceptedApplications", "$totalApplications")))))),
-                Aggregates.sort(Sorts.descending("totalApplications", "totalOpportunities", "acceptanceRate")),
-                Aggregates.limit(5)
-        )).into(new ArrayList<>());*/
-        return null;
-    }
-
 }

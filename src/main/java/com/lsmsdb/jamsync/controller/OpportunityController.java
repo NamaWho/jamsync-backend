@@ -126,4 +126,14 @@ public class OpportunityController {
             return new Response(true, e.getMessage(), null);
         }
     }
+
+    @GetMapping("/topPublishers")
+    public Response getTopPublishers(){
+        try{
+            List<Document> opportunities = this.opportunityService.getTopPublishers();
+            return new Response(false, null, opportunities);
+        } catch (Exception e){
+            return new Response(true, e.getMessage(), null);
+        }
+    }
 }

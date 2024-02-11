@@ -21,11 +21,18 @@ import org.neo4j.driver.exceptions.TransactionTerminatedException;
 
 import com.lsmsdb.jamsync.routine.Neo4jConsistencyManager;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Projections.fields;
+import static com.mongodb.client.model.Projections.include;
 import static com.mongodb.client.model.Updates.inc;
 
 public class OpportunityDAO {
@@ -163,7 +170,7 @@ public class OpportunityDAO {
             filters.add(Filters.near("location.geojson", new Point(new Position(location.getGeojson().getCoordinates().get(0), location.getGeojson().getCoordinates().get(1))), maxDistance.doubleValue()*1000, null));
         }
         if (forUser.equals("Musician") && minAge != null && minAge > 0) {
-            filters.add(Filters.gte("minimumAge", minAge));
+            filters.add(gte("minimumAge", minAge));
         }
         if (forUser.equals("Musician") && maxAge != null && maxAge > 0) {
             filters.add(Filters.lte("maximumAge", maxAge));
@@ -196,8 +203,8 @@ public class OpportunityDAO {
         return collection.aggregate(Arrays.asList(
                 Aggregates.addFields(new Field("numApplications", new Document("$size", "$applications"))),
                 Aggregates.sort(Sorts.descending("numApplications")),
-                Aggregates.project(Projections.fields(
-                        Projections.include("_id", "title", "numApplications", "publisher.type")
+                Aggregates.project(fields(
+                        include("_id", "title", "numApplications", "publisher.type")
                 )),
                 Aggregates.limit(5)
         )).into(new ArrayList<>());
@@ -228,8 +235,8 @@ public class OpportunityDAO {
                         ))
                 ), Accumulators.sum("count", 1)),
                 // project the fields to be returned
-                Aggregates.project(Projections.fields(
-                        Projections.include("_id", "count"),
+                Aggregates.project(fields(
+                        include("_id", "count"),
                         Projections.computed("ageRange", new Document("$concat", Arrays.asList(
                                 new Document("$toString", "$_id.averageAge"),
                                 new Document("$concat", Arrays.asList(" - ", new Document("$toString", new Document("$add", Arrays.asList("$_id.averageAge", 10)))))
@@ -250,8 +257,8 @@ public class OpportunityDAO {
                 // sort the genres by count
                 Aggregates.sort(Sorts.descending("count")),
                 // project the fields to be returned
-                Aggregates.project(Projections.fields(
-                        Projections.include("_id", "count")
+                Aggregates.project(fields(
+                        include("_id", "count")
                 )),
                 // limit the results to the top 5 genres
                 Aggregates.limit(5)
@@ -288,8 +295,8 @@ public class OpportunityDAO {
                                 .append("state", "$location.state"),
                         Accumulators.sum("totalOpportunities", 1)),
                 // project the fields to be returned
-                Aggregates.project(Projections.fields(
-                        Projections.include("_id", "totalOpportunities")
+                Aggregates.project(fields(
+                        include("_id", "totalOpportunities")
                 )),
                 // sort the results by the count in descending order
                 Aggregates.sort(Sorts.descending("totalOpportunities")),
@@ -297,4 +304,25 @@ public class OpportunityDAO {
         )).into(new ArrayList<>());
     }
 
+    public List<Document> getTopPublishers() throws DAOException {
+        MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
+
+        LocalDate oneWeekAgoLocalDate = LocalDate.now().minusWeeks(1);
+        Date oneWeekAgo = Date.from(oneWeekAgoLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Bson match = Aggregates.match(gte("createdAt", oneWeekAgoLocalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+        Bson group = Aggregates.group("$publisher._id",
+                Accumulators.first("username", "$publisher.username"),
+                Accumulators.first("profilePictureUrl", "$publisher.profilePictureUrl"),
+                Accumulators.first("type", "$publisher.type"),
+                Accumulators.sum("totalApplications", new Document("$size", "$applications")),
+                Accumulators.sum("totalOpportunities", 1)
+        );
+        Bson project = Aggregates.project(fields(include("username", "totalApplications", "totalOpportunities", "profilePictureUrl", "type")));
+        Bson sort = Aggregates.sort(Sorts.descending("totalApplications"));
+        Bson limit = Aggregates.limit(5);
+
+        return collection.aggregate(Arrays.asList(
+                match, group, project, sort, limit
+        )).into(new ArrayList<>());
+    }
 }

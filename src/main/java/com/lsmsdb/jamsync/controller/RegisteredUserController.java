@@ -62,16 +62,4 @@ public class RegisteredUserController {
             return new Response(true, e.getMessage(), null);
         }
     }
-
-
-    @GetMapping("/topPublishers")
-    public Response getTopPublishersByApplications() {
-        try {
-            return new Response(false, "", registeredUserService.getTopPublishers());
-        } catch (BusinessException e) {
-            return new Response(true, e.getMessage(),null);
-        }
-    }
-
-
 }

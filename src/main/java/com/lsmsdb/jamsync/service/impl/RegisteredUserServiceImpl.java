@@ -30,13 +30,4 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
             throw new BusinessException(e.getMessage());
         }
     }
-
-    @Override
-    public List<Document> getTopPublishers() throws BusinessException {
-        try {
-            return registeredUserDAO.getTopPublishers();
-        } catch (Exception e) {
-            throw new BusinessException(e.getMessage());
-        }
-    }
 }

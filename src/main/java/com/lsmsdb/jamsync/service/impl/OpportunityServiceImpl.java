@@ -87,4 +87,13 @@ public class OpportunityServiceImpl implements OpportunityService {
             throw new BusinessException(ex);
         }
     }
+
+    @Override
+    public List<Document> getTopPublishers() throws BusinessException{
+        try{
+            return opportunityDAO.getTopPublishers();
+        }catch (DAOException ex){
+            throw new BusinessException(ex);
+        }
+    }
 }
