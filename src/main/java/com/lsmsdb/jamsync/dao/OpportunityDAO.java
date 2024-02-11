@@ -26,8 +26,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.fields;
 import static com.mongodb.client.model.Projections.include;
 import static com.mongodb.client.model.Updates.inc;
@@ -37,7 +36,7 @@ public class OpportunityDAO {
     public Opportunity getOpportunityById(String id) throws DAOException{
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
-            Bson filter = eq("_id", id);
+            Bson filter = Filters.and(eq("_id", id), Filters.ne("isExpired", true));
             Bson update = inc("visits", 1);
             Document document = collection.findOneAndUpdate(filter, update, new FindOneAndUpdateOptions().returnDocument(ReturnDocument.AFTER));
             if(document != null) {
@@ -54,9 +53,9 @@ public class OpportunityDAO {
         // 0. Check if the user has already created 10 opportunities
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
-            long count = collection.countDocuments(eq("publisher._id", opportunity.getPublisher().getString("_id")));
+            long count = collection.countDocuments(Filters.and(eq("publisher._id", opportunity.getPublisher().getString("_id")), Filters.ne("isExpired", true)));
             if (count >= 10) {
-                throw new DAOException("User has already created 10 opportunities");
+                throw new DAOException("User has already created 10 active opportunities");
             }
         } catch (Exception ex) {
             throw new DAOException(ex);
@@ -117,7 +116,7 @@ public class OpportunityDAO {
         Document deletedDocument = null;
         try {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
-            deletedDocument = collection.findOneAndDelete(eq("_id", id));
+            deletedDocument = collection.findOneAndDelete(Filters.and(eq("_id", id), ne("isExpired", true)));
             if (deletedDocument == null) {
                 LogManager.getLogger("OpportunityDAO").warn("Opportunity not found with id " + id + " in MongoDB");
                 throw new Exception("Opportunity not found");
@@ -165,6 +164,7 @@ public class OpportunityDAO {
             default -> throw new IllegalArgumentException("Invalid type");
         };
         filters.add(Filters.eq("publisher.type", byUser));
+        filters.add(Filters.ne("isExpired", true));
 
         // Add filters based on the provided parameters
         if (publisherUsername != null && !publisherUsername.isEmpty()) {
@@ -193,7 +193,7 @@ public class OpportunityDAO {
         Bson filter = filters.isEmpty() ? new Document() : Filters.and(filters);
         // Calculate the number of documents to skip
         int skip = (page - 1) * pageSize;
-        LogManager.getLogger("OpportunityDAO").info("Opportunity filter: " + filter);
+
         // Execute the query
         try (MongoCursor<Document> cursor = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY).find(filter).skip(skip).limit(pageSize).iterator()) {
             List<Opportunity> opportunities = new ArrayList<>();
