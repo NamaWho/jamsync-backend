@@ -54,11 +54,10 @@ public class BandDAO {
         }
 
         // 2. Create a node in Neo4j
-        String formattedQuery = "CREATE (b:Band {_id: %s, username: %s, genres: %s }) RETURN b;";
+        String formattedQuery = "CREATE (b:Band {_id: %s, username: %s}) RETURN b;";
         String query = String.format(formattedQuery,
                 "\"" + band.get_id() + "\"",
-                "\"" + band.getUsername() + "\"",
-                "\"" + band.getGenres() + "\"");
+                "\"" + band.getUsername() + "\"");
 
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             session.executeWrite(tx -> {
@@ -127,12 +126,11 @@ public class BandDAO {
 
         // 3. Update the band in neo4j
         String formattedQuery = "MATCH (b:Band {_id: %s})\n" +
-                "SET b.username = %s, b.genres = %s\n" +
+                "SET b.username = %s \n" +
                 "RETURN b;";
         String query = String.format(formattedQuery,
                 "\"" + id + "\"",
-                "\"" + band.getUsername() + "\"",
-                "\"" + band.getGenres() + "\"");
+                "\"" + band.getUsername() + "\"");
 
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             session.executeWrite(tx -> {

@@ -50,12 +50,10 @@ public class MusicianDAO {
         }
 
         // 2. Create a node in Neo4j
-        String formattedQuery = "CREATE (m:Musician {_id: %s, username: %s, genres: %s, instruments: %s}) RETURN m;";
+        String formattedQuery = "CREATE (m:Musician {_id: %s, username: %s}) RETURN m;";
         String query = String.format(formattedQuery,
                                     "\"" + musician.get_id() + "\"",
-                                    "\"" + musician.getUsername() + "\"",
-                                    "\"" + musician.getGenres() + "\"",
-                                    "\"" + musician.getInstruments() + "\"");
+                                    "\"" + musician.getUsername() + "\"");
 
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             session.executeWrite(tx -> {
@@ -123,13 +121,11 @@ public class MusicianDAO {
 
         // 3. Update the musician in neo4j
         String formattedQuery = "MATCH (m:Musician {_id: %s})\n" +
-                                "SET m.username = %s, m.genres = %s, m.instruments = %s\n" +
+                                "SET m.username = %s \n" +
                                 "RETURN m;";
         String query = String.format(formattedQuery,
                                     "\"" + id + "\"",
-                                    "\"" + musician.getUsername() + "\"",
-                                    "\"" + musician.getGenres() + "\"",
-                                    "\"" + musician.getInstruments() + "\"");
+                                    "\"" + musician.getUsername() + "\"");
 
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             session.executeWrite(tx -> {

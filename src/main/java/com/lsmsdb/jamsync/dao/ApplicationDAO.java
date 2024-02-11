@@ -93,7 +93,8 @@ public class ApplicationDAO {
                     applicantType,
                     "\"" + application.getApplicant().getString("_id") + "\"");
 
-            try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            try {
+                Session session = Neo4jDriver.getInstance().getDriver().session();
                 session.executeWrite(tx -> {
                     tx.run(query);
                     return null;
