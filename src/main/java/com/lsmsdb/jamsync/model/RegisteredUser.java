@@ -9,6 +9,7 @@ import org.bson.Document;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,13 +37,13 @@ public abstract class RegisteredUser {
         this._id = d.getString("_id");
         this.username = d.getString("username");
         this.contactEmail = d.getString("contactEmail");
-        this.profilePictureUrl = d.getString("profilePictureUrl");
+        this.profilePictureUrl = d.containsKey("profilePictureUrl") ? d.getString("profilePictureUrl") : "";
         this.location = new Location((Document) d.get("location"));
-        this.about = d.getString("about");
-        this.genres = (List<String>) d.get("genres");
-        this.isBanned = d.getBoolean("isBanned");
-        this.opportunities = (List<Document>) d.get("opportunities");
-        this.applications = (List<Document>) d.get("applications");
+        this.about = d.containsKey("about") ? d.getString("about") : "";
+        this.genres = d.containsKey("genres") ? (List<String>) d.get("genres") : new ArrayList<>();
+        this.isBanned = d.containsKey("isBanned") && d.getBoolean("isBanned");
+        this.opportunities = d.containsKey("opportunities") ? (List<Document>) d.get("opportunities") : new ArrayList<>();
+        this.applications = d.containsKey("applications") ? (List<Document>) d.get("applications") : new ArrayList<>();
 
         String creationDateTimeString = d.getString("creationDateTime");
         if(creationDateTimeString.length() > 10) {
@@ -71,17 +72,22 @@ public abstract class RegisteredUser {
         d.append("_id", this._id);
         d.append("username", this.username);
         d.append("contactEmail", this.contactEmail);
-        d.append("about", this.about);
+        if (this.about != null && !this.about.isEmpty())
+            d.append("about", this.about);
         d.append("profilePictureUrl", this.profilePictureUrl);
-        d.append("genres", this.genres);
+        if (this.genres != null && !this.genres.isEmpty())
+            d.append("genres", this.genres);
         d.append("credentials", this.credentials.toDocument());
         d.append("location", this.location.toDocument());
-        d.append("isBanned", this.isBanned);
+        if (this.isBanned)
+            d.append("isBanned", true);
         d.append("creationDateTime", this.creationDateTime.toString());
         d.append("lastUpdateDateTime", this.lastUpdateDateTime.toString());
         d.append("lastLoginDateTime", this.lastLoginDateTime.toString());
-        d.append("opportunities", this.opportunities);
-        d.append("applications", this.applications);
+        if (this.opportunities != null && !this.opportunities.isEmpty())
+            d.append("opportunities", this.opportunities);
+        if (this.applications != null && !this.applications.isEmpty())
+            d.append("applications", this.applications);
         return d;
     }
 }

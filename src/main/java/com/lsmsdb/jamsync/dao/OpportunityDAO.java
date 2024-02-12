@@ -190,7 +190,7 @@ public class OpportunityDAO {
         }
 
         // Combine all filters. If there are no filters create an empty filter
-        Bson filter = filters.isEmpty() ? new Document() : Filters.and(filters);
+        Bson filter = Filters.and(filters);
         // Calculate the number of documents to skip
         int skip = (page - 1) * pageSize;
 

@@ -22,18 +22,20 @@ public class Application {
     public Application(Document d) {
         this._id = d.getString("_id");
         this.createdAt = LocalDate.parse(d.getString("createdAt"));
-        this.applicant = (Document) d.get("applicant"); // Directly assigned as Document
-        this.text = d.getString("text");
-        this.status = d.getInteger("status");
+        this.applicant = (Document) d.get("applicant");
+        this.text = d.containsKey("text") ? d.getString("text") : "";
+        this.status = d.containsKey("status") ? d.getInteger("status") : 0;
     }
 
     public Document toDocument() {
         Document document = new Document();
         document.put("_id", this._id);
         document.put("createdAt", this.createdAt.toString());
-        document.put("applicant", this.applicant); // Directly assigned as Document
-        document.put("text", this.text);
-        document.put("status", this.status);
+        document.put("applicant", this.applicant);
+        if (this.text != null && !this.text.isEmpty())
+            document.put("text", this.text);
+        if (this.status != null && this.status > 0)
+            document.put("status", this.status);
         return document;
     }
 }

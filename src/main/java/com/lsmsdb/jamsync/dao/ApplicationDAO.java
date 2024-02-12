@@ -19,6 +19,7 @@ import org.bson.Document;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.TransactionTerminatedException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +36,7 @@ public class ApplicationDAO {
             if (cursor.hasNext()) {
                 Document opportunityDocument = cursor.next();
 
-                List<Document> applications = opportunityDocument.getList("applications", Document.class);
+                List<Document> applications = opportunityDocument.containsKey("applications") ? opportunityDocument.getList("applications", Document.class) : new ArrayList<>();
 
                 Document applicationDocument = applications.stream()
                         .filter(appDoc -> applicationId.equals(appDoc.getString("_id")))
@@ -63,7 +64,7 @@ public class ApplicationDAO {
             MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
             // count the number of applications
             Document opportunityDocument = collection.find(eq("_id", opportunityId)).first();
-            List<Document> applications = opportunityDocument.getList("applications", Document.class);
+            List<Document> applications = opportunityDocument.containsKey("applications") ? opportunityDocument.getList("applications", Document.class) : new ArrayList<>();
             int count = applications.size();
             if (count >= 25) {
                 throw new DAOException("Applications limit reached");
@@ -126,7 +127,7 @@ public class ApplicationDAO {
             Document publisher = oldDocument.get("publisher", Document.class);
             String type = publisher.getString("type");
             String applicantType = type.equalsIgnoreCase("band") ? "Musician" : "Band";
-            List<Document> applications = oldDocument.getList("applications", Document.class);
+            List<Document> applications = oldDocument.containsKey("applications") ? oldDocument.getList("applications", Document.class) : new ArrayList<>();
             Document applicationDocument = applications.stream()
                     .filter(appDoc -> applicationId.equals(appDoc.getString("_id")))
                     .findFirst()

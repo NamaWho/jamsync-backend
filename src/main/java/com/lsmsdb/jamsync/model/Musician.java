@@ -3,9 +3,11 @@ package com.lsmsdb.jamsync.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -20,20 +22,23 @@ public class Musician extends RegisteredUser {
 
     public Musician(Document d){
         super(d);
-        this.firstName = d.getString("firstName");
-        this.lastName = d.getString("lastName");
+        this.firstName = d.containsKey("firstName") ? d.getString("firstName") : "";
+        this.lastName = d.containsKey("lastName") ? d.getString("lastName") : "";
         this.gender = d.getString("gender").charAt(0);
         this.age = d.getInteger("age");
-        this.instruments = (List<String>) d.get("instruments");
+        this.instruments = d.containsKey("instruments") ? (List<String>) d.get("instruments") : new ArrayList<>();
     }
 
     public Document toDocument() {
         Document d = super.toDocument();
-        d.append("firstName", this.firstName);
-        d.append("lastName", this.lastName);
+        if (this.firstName != null && !this.firstName.isEmpty())
+            d.append("firstName", this.firstName);
+        if (this.lastName != null && !this.lastName.isEmpty())
+            d.append("lastName", this.lastName);
         d.append("gender", this.gender);
         d.append("age", this.age);
-        d.append("instruments", this.instruments);
+        if (this.instruments != null && !this.instruments.isEmpty())
+            d.append("instruments", this.instruments);
         return d;
     }
 }

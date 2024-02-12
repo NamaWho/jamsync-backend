@@ -288,7 +288,8 @@ public class MusicianDAO {
         filters.add(musicianExpiresAtFilter);
         filters.add(musicianCountryFilter);
         filters.add(createdAtFilter);
-        filters.add(genresinstrumentsFilter);
+        if (!musicianGenres.isEmpty() || !musicianInstruments.isEmpty())
+            filters.add(genresinstrumentsFilter);
         filters.add(typeFilter);
 
         if (musicianLocation != null && !musicianLocation.getCity().isEmpty()) {
@@ -299,6 +300,7 @@ public class MusicianDAO {
         }
 
         Bson query = Filters.and(filters);
+        LogManager.getLogger("MusicianDAO").info("Query: " + query.toString());
 
         MongoCursor<Document> cursor = collection.find(query).limit(10).iterator();
         while (cursor.hasNext()) {
@@ -361,7 +363,8 @@ public class MusicianDAO {
         List<Bson> filters = new ArrayList<>();
         filters.add(exludeMusicianFilter);
         filters.add(musicianCountryFilter);
-        filters.add(genresinstrumentsFilter);
+        if (!musicianGenres.isEmpty() || !musicianInstruments.isEmpty())
+            filters.add(genresinstrumentsFilter);
 
         if (musicianLocation != null && !musicianLocation.getCity().isEmpty()) {
             Point musicianPoint = new Point(new Position(musicianLocation.getGeojson().getCoordinates().get(0),
@@ -428,6 +431,7 @@ public class MusicianDAO {
         List<Bson> filters = new ArrayList<>();
         filters.add(exludeBandFilter);
         filters.add(bandCountryFilter);
+        if (!musicianGenres.isEmpty())
         filters.add(genresFilter);
 
         if (musicianLocation != null && !musicianLocation.getCity().isEmpty()) {

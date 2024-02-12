@@ -62,7 +62,8 @@ public class AuthDAO {
                 //Document doc = cursor.next();
 
             if (document != null) {
-                boolean isBanned = document.getBoolean("isBanned");
+                //if isBanned is set, get the value, check it and return null if true
+                boolean isBanned = document.containsKey("isBanned");
                 if(isBanned)
                     return null;
 

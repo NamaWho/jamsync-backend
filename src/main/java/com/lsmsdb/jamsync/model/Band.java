@@ -3,6 +3,7 @@ package com.lsmsdb.jamsync.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 
 import java.time.LocalDate;
@@ -13,26 +14,29 @@ import java.util.List;
 @NoArgsConstructor
 public class Band extends RegisteredUser{
     private Double yearsTogether;
-    // membersNumber
-    // membersAvgAge
     private Integer gigsPlayed;
-    //followersCount
 
     public Band(Document d){
         super(d);
-        this.yearsTogether = d.getDouble("yearsTogether");
-        if (d.get("gigsPlayed") instanceof String) {
-            this.gigsPlayed = Integer.parseInt(d.getString("gigsPlayed"));
-        }
-        else {
-            this.gigsPlayed = d.getInteger("gigsPlayed");
+        this.yearsTogether = d.containsKey("yearsTogether") ? d.getDouble("yearsTogether"): null;
+        if (d.containsKey("gigsPlayed")){
+            if (d.get("gigsPlayed") instanceof String) {
+                this.gigsPlayed = Integer.parseInt(d.getString("gigsPlayed"));
+            }
+            else {
+                this.gigsPlayed = d.getInteger("gigsPlayed");
+            }
+        } else {
+            this.gigsPlayed = null;
         }
     }
 
     public Document toDocument() {
         Document d = super.toDocument();
-        d.append("yearsTogether", this.yearsTogether);
-        d.append("gigsPlayed", this.gigsPlayed);
+        if (this.yearsTogether != null)
+            d.append("yearsTogether", this.yearsTogether);
+        if (this.gigsPlayed != null)
+            d.append("gigsPlayed", this.gigsPlayed);
         return d;
     }
 }

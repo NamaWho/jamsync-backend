@@ -112,7 +112,7 @@ public class MongoUpdater {
             cursor = collection.find(eq("_id", applicantId)).iterator();
             if(cursor.hasNext()) {
                 Document document = cursor.next();
-                List<Document> applications = (List<Document>) document.get("applications");
+                List<Document> applications = document.containsKey("applications") ? (List<Document>) document.get("applications") : new ArrayList<>();
                 // add the new application
                 Document applicationEntry = new Document();
                 applicationEntry.put("_id", application.getString("_id"));
@@ -185,7 +185,7 @@ public class MongoUpdater {
             if(cursor.hasNext()) {
                 Document document = cursor.next();
                 // retrieve the opportunities array
-                List<Document> opportunities = (List<Document>) document.get("opportunities");
+                List<Document> opportunities = document.containsKey("opportunities") ? (List<Document>) document.get("opportunities") : new ArrayList<>();
                 // add the new opportunity
                 Document opportunityEntry = new Document();
                 opportunityEntry.put("_id", opportunity.getString("_id"));
@@ -233,7 +233,7 @@ public class MongoUpdater {
 
             // 2. remove opportunity from the applications documents in the applicants documents
             List<WriteModel<Document>> bulkWrites = new ArrayList<>();
-            List<Document> applications = (List<Document>) opportunity.get("applications");
+            List<Document> applications = opportunity.containsKey("applications") ? (List<Document>) opportunity.get("applications") : new ArrayList<>();
             String applicantType = publisherType.equals("Musician") ? "BAND" : "MUSICIAN";
             collectionName = MongoCollectionsEnum.valueOf(applicantType.toUpperCase());
 
@@ -268,7 +268,7 @@ public class MongoUpdater {
             newApplicant.put("username", musician.getString("username"));
             newApplicant.put("profilePictureUrl", musician.getString("profilePictureUrl"));
             newApplicant.put("contactEmail", musician.getString("contactEmail"));
-            List<Document> applications = (List<Document>) musician.get("applications");
+            List<Document> applications = musician.containsKey("applications") ? (List<Document>) musician.get("applications") : new ArrayList<>();
             for(Document application : applications) {
                 bulkWrites.add(new UpdateOneModel<>(
                         Filters.elemMatch("applications", Filters.eq("_id", application.getString("_id"))),
@@ -277,7 +277,7 @@ public class MongoUpdater {
             }
 
             // 2. update the musician's data in his published opportunities
-            List<Document> opportunities = (List<Document>) musician.get("opportunities");
+            List<Document> opportunities = musician.containsKey("opportunities") ? (List<Document>) musician.get("opportunities") : new ArrayList<>();
             Document newPublisher = new Document();
             newPublisher.put("_id", musician.getString("_id"));
             newPublisher.put("type", "Musician");
@@ -306,14 +306,14 @@ public class MongoUpdater {
 
         try {
             // 1. remove all the opportunities published by the musician
-            List<Document> opportunities = (List<Document>) musician.get("opportunities");
+            List<Document> opportunities = musician.containsKey("opportunities") ? (List<Document>) musician.get("opportunities") : new ArrayList<>();
             for(Document opportunity : opportunities) {
                 opportunityDAO.deleteOpportunityById(opportunity.getString("_id"));
             }
 
             // 2. remove musician's applications in the opportunities documents
             List<WriteModel<Document>> bulkWrites = new ArrayList<>();
-            List<Document> applications = (List<Document>) musician.get("applications");
+            List<Document> applications = musician.containsKey("applications") ? (List<Document>) musician.get("applications") : new ArrayList<>();
             for(Document application : applications) {
                 String applicationId = application.getString("_id");
 
@@ -344,7 +344,7 @@ public class MongoUpdater {
             newApplicant.put("username", band.getString("username"));
             newApplicant.put("profilePictureUrl", band.getString("profilePictureUrl"));
             newApplicant.put("contactEmail", band.getString("contactEmail"));
-            List<Document> applications = (List<Document>) band.get("applications");
+            List<Document> applications = band.containsKey("applications") ? (List<Document>) band.get("applications") : new ArrayList<>();
             for(Document application : applications) {
                 bulkWrites.add(new UpdateOneModel<>(
                         Filters.elemMatch("applications", Filters.eq("_id", application.getString("_id"))),
@@ -353,7 +353,7 @@ public class MongoUpdater {
             }
 
             // 2. update the band's data in his published opportunities
-            List<Document> opportunities = (List<Document>) band.get("opportunities");
+            List<Document> opportunities = band.containsKey("opportunities") ? (List<Document>) band.get("opportunities") : new ArrayList<>();
             Document newPublisher = new Document();
             newPublisher.put("_id", band.getString("_id"));
             newPublisher.put("type", "Band");
@@ -383,14 +383,14 @@ public class MongoUpdater {
 
         try {
             // 1. remove all the opportunities published by the band
-            List<Document> opportunities = (List<Document>) band.get("opportunities");
+            List<Document> opportunities = band.containsKey("opportunities") ? (List<Document>) band.get("opportunities") : new ArrayList<>();
             for(Document opportunity : opportunities) {
                 opportunityDAO.deleteOpportunityById(opportunity.getString("_id"));
             }
 
             // 2. remove band's applications in the opportunities documents
             List<WriteModel<Document>> bulkWrites = new ArrayList<>();
-            List<Document> applications = (List<Document>) band.get("applications");
+            List<Document> applications = band.containsKey("applications") ? (List<Document>) band.get("applications") : new ArrayList<>();
             for(Document application : applications) {
                 String applicationId = application.getString("_id");
 

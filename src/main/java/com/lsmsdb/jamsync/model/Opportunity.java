@@ -10,6 +10,7 @@ import org.bson.Document;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -37,13 +38,13 @@ public class Opportunity {
         this._id = d.getString("_id");
         this.location = new Location((Document) d.get("location"));
         this.title = d.getString("title");
-        this.description = d.getString("description");
-        this.role = d.getString("role");
-        this.instruments = (d.get("instruments") == null || d.get("instruments").toString().isEmpty()) ? null : (List<String>) d.get("instruments");
-        this.genres = (List<String>) d.get("genres");
-        this.minimumAge = d.getInteger("minimumAge") == null ? 0 : d.getInteger("minimumAge");
-        this.maximumAge = d.getInteger("maximumAge") == null ? 0 : d.getInteger("maximumAge");
-        this.gender = (d.getString("gender") == null || d.getString("gender").isEmpty()) ? "-" : d.getString("gender");
+        this.description = d.containsKey("description") ? d.getString("description") : "";
+        this.role = d.containsKey("role") ? d.getString("role") : "";
+        this.instruments = (d.containsKey("instruments") && d.get("instruments") != null && !d.get("instruments").toString().isEmpty()) ? (List<String>) d.get("instruments") : new ArrayList<>();
+        this.genres = d.containsKey("genres") ? (List<String>) d.get("genres") : new ArrayList<>();
+        this.minimumAge = d.containsKey("minimumAge") ? d.getInteger("minimumAge") : 0;
+        this.maximumAge = d.containsKey("maximumAge") ? d.getInteger("maximumAge") : 0;
+        this.gender = d.containsKey("gender") ? d.getString("gender") : "-";
 
         String creationDateTimeString = d.getString("createdAt");
         if(creationDateTimeString.length() > 10) {
@@ -62,9 +63,9 @@ public class Opportunity {
                 this.expiresAt = LocalDate.parse(expiresAtString);
             }
         }
-        this.visits = d.getInteger("visits");
+        this.visits = d.containsKey("visits") ? d.getInteger("visits") : 0;
         this.publisher = (Document) d.get("publisher");
-        this.applications = (List<Application>) d.get("applications");
+        this.applications = d.containsKey("applications") ? (List<Application>) d.get("applications") : new ArrayList<>();
     }
 
     public Document toDocument() {
@@ -72,18 +73,26 @@ public class Opportunity {
         document.put("_id", this._id);
         document.put("location", this.location.toDocument());
         document.put("title", this.title);
-        document.put("description", this.description);
-        document.put("role", this.role);
-        document.put("instruments", this.instruments);
-        document.put("genres", this.genres);
-        document.put("minimumAge", this.minimumAge);
-        document.put("maximumAge", this.maximumAge);
+        if (this.description != null && !this.description.isEmpty())
+            document.put("description", this.description);
+        if (this.role != null && !this.role.isEmpty())
+            document.put("role", this.role);
+        if (this.instruments != null && !this.instruments.isEmpty())
+            document.put("instruments", this.instruments);
+        if (this.genres != null && !this.genres.isEmpty())
+            document.put("genres", this.genres);
+        if (this.minimumAge != 0)
+            document.put("minimumAge", this.minimumAge);
+        if (this.maximumAge != 0)
+            document.put("maximumAge", this.maximumAge);
         document.put("gender", this.gender);
         document.put("createdAt", this.createdAt.toString());
         document.put("expiresAt", this.expiresAt.toString());
-        document.put("visits", this.visits);
+        if (this.visits != null && this.visits != 0)
+            document.put("visits", this.visits);
         document.put("publisher", this.publisher);
-        document.put("applications", this.applications);
+        if (this.applications != null && !this.applications.isEmpty())
+            document.put("applications", this.applications);
         return document;
     }
 }

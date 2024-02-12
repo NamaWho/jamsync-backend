@@ -119,6 +119,7 @@ public class BandDAO {
             }
         } catch (Exception ex) {
             LogManager.getLogger("BandDAO").error("Error while updating band with id " + id + " in MongoDB");
+            LogManager.getLogger("BandDAO").error(ex.getMessage());
             throw new DAOException(ex);
         }
 
@@ -297,6 +298,7 @@ public class BandDAO {
         filters.add(expiresAtFilter);
         filters.add(bandCountryFilter);
         filters.add(createdAtFilter);
+        if (!bandGenres.isEmpty())
         filters.add(genresFilter);
         filters.add(typeFilter);
 
