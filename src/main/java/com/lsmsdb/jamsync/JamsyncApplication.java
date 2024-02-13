@@ -6,6 +6,8 @@ import com.lsmsdb.jamsync.repository.enums.MongoCollectionsEnum;
 import com.lsmsdb.jamsync.routine.MongoUpdater;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import lombok.extern.java.Log;
+import org.apache.logging.log4j.LogManager;
 import org.bson.Document;
 import org.neo4j.driver.Session;
 import org.springframework.boot.SpringApplication;
@@ -27,13 +29,13 @@ public class JamsyncApplication {
 	private static void testMongoDriver() {
 		MongoDriver mongoDriver = MongoDriver.getInstance();
 		MongoCollection<Document> collection = mongoDriver.getCollection(MongoCollectionsEnum.MUSICIAN);
-		System.out.println("Collection name: " + collection.getNamespace().getCollectionName());
-		System.out.println("Database name: " + collection.getNamespace().getDatabaseName());
+		LogManager.getLogger().info("JamSync Application started [MongoDB]");
 		//mongoDriver.closeConnection();
 	}
 
 	private static void testNeo4jDriver() {
 		Neo4jDriver neo4jDriver = Neo4jDriver.getInstance();
 		Session session = neo4jDriver.getDriver().session();
+		LogManager.getLogger().info("JamSync Application started [Neo4j]");
 	}
 }
