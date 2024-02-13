@@ -211,6 +211,7 @@ public class OpportunityDAO {
         MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
 
         return collection.aggregate(Arrays.asList(
+                Aggregates.match(Filters.ne("applications", null)),
                 Aggregates.addFields(new Field("numApplications", new Document("$size", "$applications"))),
                 Aggregates.sort(Sorts.descending("numApplications")),
                 Aggregates.project(fields(
@@ -298,7 +299,8 @@ public class OpportunityDAO {
 
         LocalDate oneWeekAgoLocalDate = LocalDate.now().minusWeeks(1);
         Date oneWeekAgo = Date.from(oneWeekAgoLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Bson match = Aggregates.match(gte("createdAt", oneWeekAgoLocalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+        Bson match1 = Aggregates.match(gte("createdAt", oneWeekAgoLocalDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
+        Bson match2 = Aggregates.match(Filters.ne("applications", null));
         Bson group = Aggregates.group("$publisher._id",
                 Accumulators.first("username", "$publisher.username"),
                 Accumulators.first("profilePictureUrl", "$publisher.profilePictureUrl"),
@@ -311,7 +313,7 @@ public class OpportunityDAO {
         Bson limit = Aggregates.limit(5);
 
         return collection.aggregate(Arrays.asList(
-                match, group, project, sort, limit
+                match1, match2, group, project, sort, limit
         )).into(new ArrayList<>());
     }
 }
