@@ -26,7 +26,7 @@ public class ExpirationChecker {
 
     public ExpirationChecker() {}
 
-    @Scheduled(cron = "0 0 0 * * ?") // this runs the task every day at midnight
+    @Scheduled(fixedRate = 24 * 60 * 60 * 1000) // this runs the task every 24 hours
     public void checkExpiration() {
         String today = LocalDate.now().toString();
         //List<Document> expiredOpportunities = opportunityCollection.find(Filters.lte("expiresAt", today)).into(new ArrayList<>());
