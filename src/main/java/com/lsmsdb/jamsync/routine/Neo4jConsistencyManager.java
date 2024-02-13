@@ -39,7 +39,7 @@ public class Neo4jConsistencyManager {
         return operations.poll();
     }
 
-    @Scheduled(cron = "0 0/5 * * * ?") // this runs the task every 5 minutes
+    @Scheduled(fixedRate = 300000) // this runs the task every 5 minutes
     private void retryOperation() {
         LogManager.getLogger("Neo4jConsistencyManager").info("Retrying Neo4j failed operations...");
         String operation = popOperation();

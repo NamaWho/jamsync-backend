@@ -59,7 +59,7 @@ public class MongoUpdater {
         failedTasks.clear();
     }
 
-    @Scheduled(cron = "0 0/1 * * * ?") // this runs the task every minute
+    @Scheduled(fixedRate = 60000) // this runs the task every minute
     private void updateMongoData() {
         LogManager.getLogger("MongoUpdater").info("updateMongoData routine started...");
         retryFailedTasks();

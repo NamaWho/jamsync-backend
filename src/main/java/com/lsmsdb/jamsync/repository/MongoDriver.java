@@ -18,13 +18,13 @@ public class MongoDriver {
     private final MongoDatabase defaultDB;
 
     private MongoDriver(){
-        String host = MongoConfig.getMongoHost();
-        int portOne = MongoConfig.getMongoPortOne();
-        int portTwo = MongoConfig.getMongoPortTwo();
-        int portThree = MongoConfig.getMongoPortThree();
+        String hostOne = MongoConfig.getMongoHostOne();
+        String hostTwo = MongoConfig.getMongoHostTwo();
+        String hostThree = MongoConfig.getMongoHostThree();
+        int port = MongoConfig.getMongoPort();
         String database = MongoConfig.getMongoDatabase();
 
-        String connectionString = String.format(MONGO_URI, host, portOne, host, portTwo, host, portThree);
+        String connectionString = String.format(MONGO_URI, hostOne, port, hostTwo, port, hostThree, port);
 
         client = MongoClients.create(connectionString);
         defaultDB = client.getDatabase(database)

@@ -18,17 +18,17 @@ public class MongoConfig {
         }
     }
 
-    public static String getMongoHost() {
-        return properties.getProperty("mongo.host");
+    public static String getMongoHostOne() {
+        return properties.getProperty("mongo.hostOne");
     }
 
-    public static int getMongoPortOne() {
-        return Integer.parseInt(properties.getProperty("mongo.portOne"));
+    public static String getMongoHostTwo() { return properties.getProperty("mongo.hostTwo"); }
+
+    public static String getMongoHostThree() { return properties.getProperty("mongo.hostThree"); }
+
+    public static int getMongoPort() {
+        return Integer.parseInt(properties.getProperty("mongo.port"));
     }
-
-    public static int getMongoPortTwo() { return Integer.parseInt(properties.getProperty("mongo.portTwo")); }
-
-    public static int getMongoPortThree() { return Integer.parseInt(properties.getProperty("mongo.portThree")); }
 
     public static String getMongoDatabase() {
         return properties.getProperty("mongo.database");
