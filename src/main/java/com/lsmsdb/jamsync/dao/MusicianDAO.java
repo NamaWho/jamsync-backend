@@ -265,7 +265,6 @@ public class MusicianDAO {
         Location musicianLocation = m.getLocation();
         String musicianCountry = musicianLocation.getCountry();
         Integer maxDistance = 150;
-        LocalDate sixtyDaysAgo = LocalDate.now().minusDays(60);
         String today = LocalDate.now().toString();
 
         MongoCollection<Document> collection = MongoDriver.getInstance().getCollection(MongoCollectionsEnum.OPPORTUNITY);
@@ -277,7 +276,6 @@ public class MusicianDAO {
         Bson musicianCountryFilter = Filters.or(
                 Filters.eq("location.state", musicianCountry),
                 Filters.eq("location.country", musicianCountry));
-        Bson createdAtFilter = Filters.gte("createdAt", sixtyDaysAgo.toString());
         Bson genresinstrumentsFilter = Filters.or(
                 Filters.in("genres", musicianGenres),
                 Filters.in("instruments", musicianInstruments)
@@ -287,7 +285,6 @@ public class MusicianDAO {
         List<Bson> filters = new ArrayList<>();
         filters.add(musicianExpiresAtFilter);
         filters.add(musicianCountryFilter);
-        filters.add(createdAtFilter);
         if (!musicianGenres.isEmpty() || !musicianInstruments.isEmpty())
             filters.add(genresinstrumentsFilter);
         filters.add(typeFilter);
@@ -300,7 +297,6 @@ public class MusicianDAO {
         }
 
         Bson query = Filters.and(filters);
-        LogManager.getLogger("MusicianDAO").info("Query: " + query.toString());
 
         MongoCursor<Document> cursor = collection.find(query).limit(10).iterator();
         while (cursor.hasNext()) {
