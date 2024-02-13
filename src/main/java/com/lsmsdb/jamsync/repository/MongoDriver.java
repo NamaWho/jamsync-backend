@@ -13,7 +13,7 @@ import org.apache.logging.log4j.LogManager;
 public class MongoDriver {
 
     private static final MongoDriver driver = new MongoDriver();
-    private static final String MONGO_URI = "mongodb://%s:%d,%s:%d,%s:%d/?w=majority&readPreference=primary&wtimeoutms=5000&retryWrites=true";
+    private static final String MONGO_URI = "mongodb://%s:%d,%s:%d,%s:%d/?w=W1&readPreference=secondaryPreferred&wtimeoutms=5000&retryWrites=true";
     private final MongoClient client;
     private final MongoDatabase defaultDB;
 
@@ -25,15 +25,17 @@ public class MongoDriver {
         String database = MongoConfig.getMongoDatabase();
 
         String connectionString = String.format(MONGO_URI, host, portOne, host, portTwo, host, portThree);
-        LogManager.getLogger().info("MongoDB connection string: " + connectionString);
+
         client = MongoClients.create(connectionString);
         defaultDB = client.getDatabase(database)
-                .withWriteConcern(WriteConcern.MAJORITY)
-                .withReadPreference(ReadPreference.primary());
+                .withWriteConcern(WriteConcern.W1)
+                .withReadPreference(ReadPreference.secondaryPreferred());
     }
 
     public MongoCollection getCollection(MongoCollectionsEnum c){
-        return defaultDB.getCollection(c.getName());
+        return defaultDB.getCollection(c.getName())
+                .withWriteConcern(WriteConcern.W1)
+                .withReadPreference(ReadPreference.secondaryPreferred());
     }
 
     public static MongoDriver getInstance(){return driver;}
