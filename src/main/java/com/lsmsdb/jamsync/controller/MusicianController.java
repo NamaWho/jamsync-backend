@@ -185,14 +185,14 @@ public class MusicianController {
         }
     }
 
-   /* @PostMapping("/suggestedOpportunitiesByNetworkAndSimilarities")
-    public Response suggestOpportunitiesByNetworkAndSimilarities(@RequestBody Musician m) {
+    @GetMapping("/bandAffinity")
+    public Response getBandAffinity(@RequestParam String musicianId, @RequestParam String bandId) {
         try {
-            return new Response(false, "", musicianService.suggestOpportunitiesByNetworkAndSimilarities(m));
+            return new Response(false, "", musicianService.getBandAffinity(musicianId, bandId));
         } catch (BusinessException ex) {
             return new Response(true, ex.getMessage(), null);
         }
-    }*/
+    }
 }
 
 

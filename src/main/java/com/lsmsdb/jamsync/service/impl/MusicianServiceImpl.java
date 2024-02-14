@@ -138,13 +138,13 @@ public class MusicianServiceImpl implements MusicianService {
         }
     }
 
-    /*@Override
-    public List<Document> suggestOpportunitiesByNetworkAndSimilarities(Musician m) throws BusinessException {
+    @Override
+    public Integer getBandAffinity(String musicianId, String bandId) throws BusinessException {
         try {
-            return musicianDAO.suggestOpportunitiesByNetworkAndSimilarities(m);
+            return musicianDAO.getBandAffinity(musicianId, bandId);
         } catch (DAOException ex) {
             throw new BusinessException(ex);
         }
-    }*/
+    }
 
 }

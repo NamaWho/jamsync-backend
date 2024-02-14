@@ -476,4 +476,24 @@ public class MusicianDAO {
             throw new DAOException(e.getMessage());
         }
     }
+
+    public Integer getBandAffinity(String musicianId, String bandId) throws DAOException {
+        try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
+            return session.executeRead(tx -> {
+                String formattedQuery = "MATCH p=shortestPath((m1:Musician {_id: '%s'})-[:FOLLOWS|MEMBER_OF*..50]-(b1:Band {_id: '%s'})) RETURN length(p) as pathDistance";
+                String query = String.format(formattedQuery, musicianId, bandId);
+                // result of the query is a number representing the length of the shortest path
+                Result result = tx.run(query);
+                LogManager.getLogger("MusicianDAO").info("Result: " + result.toString());
+                if (result.hasNext()) {
+                    Record record = result.next();
+                    return record.get("pathDistance").asInt();
+                }
+                return -1;
+            });
+        } catch (Neo4jException e) {
+            LogManager.getLogger("MusicianDAO").error(e.getMessage());
+            throw new DAOException("Error while getting band affinity");
+        }
+    }
 }

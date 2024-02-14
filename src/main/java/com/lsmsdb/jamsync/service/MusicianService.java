@@ -38,4 +38,6 @@ public interface MusicianService {
     List<Musician> getSuggestedMusiciansBySimilarities(Musician m) throws BusinessException;
 
     List<Band> getSuggestedBandsBySimilarities(Musician m) throws BusinessException;
+
+    Integer getBandAffinity(String musicianId, String bandId) throws BusinessException;
 }

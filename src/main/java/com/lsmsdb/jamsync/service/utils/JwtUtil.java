@@ -37,7 +37,7 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
-
+    /*
     // Validate a JWT
     public static boolean validateToken(String token, String subject) {
         try {
@@ -61,4 +61,5 @@ public class JwtUtil {
             return null;
         }
     }
+    */
 }

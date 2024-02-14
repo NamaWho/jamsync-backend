@@ -299,7 +299,7 @@ public class BandDAO {
         filters.add(bandCountryFilter);
         filters.add(createdAtFilter);
         if (!bandGenres.isEmpty())
-        filters.add(genresFilter);
+            filters.add(genresFilter);
         filters.add(typeFilter);
 
         if (bandLocation != null && !bandLocation.getCity().isEmpty()) {
