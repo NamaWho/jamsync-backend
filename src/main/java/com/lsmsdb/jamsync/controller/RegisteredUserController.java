@@ -33,7 +33,6 @@ public class RegisteredUserController {
     public Response searchUsers(
             @RequestBody Map<String, Object> body) {
         Document doc = new Document(body);
-        LogManager.getLogger("RegisteredUserController").info("Searching users with parameters: " + doc.toJson());
         if (doc.getString("type") == null)
             return new Response(true, "Invalid type", null);
 
@@ -42,9 +41,7 @@ public class RegisteredUserController {
             String username = doc.getString("username") != null ? doc.getString("username") : null;
             List<String> genres = doc.get("genres") != null ? (List<String>) doc.get("genres") : null;
             List<String> instruments = doc.get("instruments") != null ? (List<String>) doc.get("instruments") : null;
-            LogManager.getLogger("RegisteredUserController").info("Searching adasdas users with parameters: " + doc.get("location"));
             Location location = doc.get("location") != null ? new Location((Map<String, Object>) doc.get("location")) : null;
-            LogManager.getLogger("RegisteredUserController").info("Searchingssssss users with parameters: " + doc.toJson());
             Integer maxDistance = doc.getInteger("maxDistance") != null? doc.getInteger("maxDistance") : null;
             Integer minAge = doc.getInteger("minAge") != null ? doc.getInteger("minAge") : null;
             Integer maxAge = doc.getInteger("maxAge") != null ? doc.getInteger("maxAge") : null;
@@ -53,7 +50,6 @@ public class RegisteredUserController {
             Integer pageSize = doc.getInteger("pageSize") != null ? doc.getInteger("pageSize") : null;
             page = page == null ? 1 : page;
             pageSize = pageSize == null ? 10 : pageSize;
-
 
             List<RegisteredUser> users = this.registeredUserService.searchUser(type, username, genres, instruments, location, maxDistance, minAge, maxAge, gender, page, pageSize);
             return new Response(false, null, users);
