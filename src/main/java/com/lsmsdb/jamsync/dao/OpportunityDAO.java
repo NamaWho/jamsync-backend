@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.fields;
@@ -85,14 +86,19 @@ public class OpportunityDAO {
                 "MATCH (u:%s {_id: %s}) " +
                 "CREATE (u)-[:PUBLISHED]->(o)";
 
+        List<String> genresList = opportunity.getGenres();
+        String genres = genresList != null ? "["+ genresList.stream().map(genre -> "\"" + genre + "\"").collect(Collectors.joining(", ")) + "]" : "[]";
+
+        List<String> instrumentsList = opportunity.getInstruments();
+        String instruments = instrumentsList != null ? "[" + instrumentsList.stream().map(instrument -> "\"" + instrument + "\"").collect(Collectors.joining(", ")) + "]" : "[]";
+
         String query = String.format(formattedQuery,
                 "\"" + opportunity.get_id() + "\"",
                 "\"" + opportunity.getTitle() + "\"",
-                "\"" + opportunity.getGenres() + "\"",
-                "\"" + opportunity.getInstruments() + "\"",
+                genres,
+                instruments,
                 opportunity.getPublisher().getString("type"),
                 "\"" + opportunity.getPublisher().getString("_id") + "\"");
-
         try (Session session = Neo4jDriver.getInstance().getDriver().session()) {
             session.executeWrite(tx -> {
                 tx.run(query);
